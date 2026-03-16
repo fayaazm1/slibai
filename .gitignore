@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 .venv/
+venv/
 *.egg-info/
 .python-version
 
@@ -11,12 +12,21 @@ backend/app/data/ai_tools_backup.json
 backend/app/data/*.tmp
 
 # Frontend dependencies and build output
+node_modules/
 frontend/node_modules/
 frontend/dist/
 
 # macOS
 .DS_Store
+Thumbs.db
 
 # Environment variables (never commit secrets)
 .env
 .env.local
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
