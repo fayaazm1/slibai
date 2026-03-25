@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.python-version
+
+# Data backups / temp files
+backend/app/data/ai_tools_backup.json
+backend/app/data/*.tmp
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+
+# macOS
+.DS_Store
+
+# Environment variables (never commit secrets)
+.env
+.env.local
