@@ -1,0 +1,4127 @@
+[
+  {
+    "id": 1,
+    "name": "TensorFlow",
+    "category": "Fine-Tuning / Training",
+    "function": "Machine Learning Platform",
+    "description": "An open-source platform developed by Google for building and deploying machine learning and deep learning models at scale.",
+    "developer": "Google",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "h5py",
+      "CUDA (optional)"
+    ],
+    "social_impact": "Used in healthcare diagnostics, satellite imagery analysis, and real-time translation services across global platforms.",
+    "example_code": "import tensorflow as tf\nmodel = tf.keras.Sequential([tf.keras.layers.Dense(10, activation='relu'), tf.keras.layers.Dense(1)])\nmodel.compile(optimizer='adam', loss='mse')\nprint(model.summary())",
+    "official_url": "https://www.tensorflow.org",
+    "tags": [
+      "deep-learning",
+      "neural-networks",
+      "model-training",
+      "gpu",
+      "production",
+      "keras-api"
+    ],
+    "use_cases": [
+      "train custom neural networks",
+      "deploy ML models",
+      "transfer learning",
+      "image classification",
+      "NLP model training"
+    ],
+    "url_status": "valid",
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stars": 194321,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "id": 2,
+    "name": "PyTorch",
+    "category": "Fine-Tuning / Training",
+    "function": "Deep Learning Framework",
+    "description": "An open-source deep learning framework with a dynamic computation graph, widely preferred for research and production model development.",
+    "developer": "Meta AI",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "CUDA (optional)",
+      "cuDNN (optional)"
+    ],
+    "social_impact": "Used in drug discovery pipelines, medical imaging, and autonomous vehicle perception systems at major research institutions.",
+    "example_code": "import torch\nx = torch.tensor([1.0, 2.0, 3.0])\nlinear = torch.nn.Linear(3, 1)\noutput = linear(x)\nprint(output)",
+    "official_url": "https://pytorch.org",
+    "tags": [
+      "deep-learning",
+      "dynamic-graphs",
+      "research",
+      "gpu",
+      "autograd"
+    ],
+    "use_cases": [
+      "research prototyping",
+      "fine-tuning LLMs",
+      "custom model training",
+      "computer vision",
+      "NLP"
+    ],
+    "url_status": "valid",
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stars": 98495,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "id": 3,
+    "name": "Scikit-learn",
+    "category": "MLOps / LLMOps",
+    "function": "Machine Learning Library",
+    "description": "A Python library providing simple and consistent APIs for classical machine learning algorithms including classification, regression, and clustering.",
+    "developer": "INRIA Community",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "SciPy",
+      "joblib"
+    ],
+    "social_impact": "Used in credit risk scoring, disease classification, and fraud detection across financial and healthcare sectors.",
+    "example_code": "from sklearn.linear_model import LinearRegression\nimport numpy as np\nX = np.array([[1], [2], [3]])\ny = np.array([2, 4, 6])\nmodel = LinearRegression().fit(X, y)\nprint(model.predict([[4]]))",
+    "official_url": "https://scikit-learn.org",
+    "tags": [
+      "machine-learning",
+      "classification",
+      "regression",
+      "clustering",
+      "scikit"
+    ],
+    "use_cases": [
+      "build ML pipelines",
+      "feature engineering",
+      "model evaluation",
+      "classification tasks",
+      "regression tasks"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 4,
+    "name": "Keras",
+    "category": "Fine-Tuning / Training",
+    "function": "Neural Networks API",
+    "description": "A high-level neural networks API supporting multiple backends including TensorFlow, JAX, and PyTorch, designed for fast prototyping and production deployment.",
+    "developer": "Keras Team / François Chollet",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "TensorFlow, JAX, or PyTorch (any one backend)",
+      "NumPy"
+    ],
+    "social_impact": "Used in rapid prototyping of clinical AI models, environmental monitoring systems, and academic research due to its beginner-friendly API.",
+    "example_code": "from tensorflow import keras\nmodel = keras.Sequential([keras.layers.Dense(8, activation='relu', input_shape=(4,)), keras.layers.Dense(1, activation='sigmoid')])\nmodel.compile(optimizer='adam', loss='binary_crossentropy')\nprint(model.summary())",
+    "official_url": "https://keras.io",
+    "tags": [
+      "deep-learning",
+      "neural-networks",
+      "high-level-api",
+      "rapid-prototyping"
+    ],
+    "use_cases": [
+      "rapid model prototyping",
+      "neural network design",
+      "transfer learning",
+      "image classification"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 5,
+    "name": "Gymnasium",
+    "category": "AI Agents",
+    "function": "Reinforcement Learning Toolkit",
+    "description": "The maintained successor to OpenAI Gym, providing a standard API and a collection of environments for developing and benchmarking reinforcement learning algorithms.",
+    "developer": "Farama Foundation",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "macOS",
+      "Windows"
+    ],
+    "dependencies": [
+      "NumPy",
+      "pygame (optional)"
+    ],
+    "social_impact": "Used in robotics simulation, autonomous control research, and academic RL coursework to provide reproducible benchmarking environments.",
+    "example_code": "import gymnasium as gym\nenv = gym.make('CartPole-v1')\nobs, info = env.reset()\nfor _ in range(10):\n    obs, reward, done, truncated, info = env.step(env.action_space.sample())\nenv.close()",
+    "official_url": "https://gymnasium.farama.org",
+    "tags": [
+      "reinforcement-learning",
+      "gym",
+      "rl-environments",
+      "simulation"
+    ],
+    "use_cases": [
+      "train RL agents",
+      "game AI",
+      "robotic control simulation",
+      "benchmark RL algorithms"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 6,
+    "name": "XGBoost",
+    "category": "MLOps / LLMOps",
+    "function": "Gradient Boosting Framework",
+    "description": "A scalable and efficient gradient boosting library optimized for speed and performance, widely used in structured data competitions and production pipelines.",
+    "developer": "DMLC Community",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "R",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "SciPy"
+    ],
+    "social_impact": "Widely deployed in bank fraud detection, insurance risk modeling, and clinical outcome prediction.",
+    "example_code": "import xgboost as xgb\nfrom sklearn.datasets import load_iris\nX, y = load_iris(return_X_y=True)\nmodel = xgb.XGBClassifier()\nmodel.fit(X, y)\nprint(model.predict(X[:3]))",
+    "official_url": "https://xgboost.readthedocs.io",
+    "tags": [
+      "gradient-boosting",
+      "tabular-data",
+      "xgboost",
+      "classification"
+    ],
+    "use_cases": [
+      "tabular data prediction",
+      "Kaggle competitions",
+      "fraud detection",
+      "churn prediction"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 7,
+    "name": "LightGBM",
+    "category": "MLOps / LLMOps",
+    "function": "Gradient Boosting Framework",
+    "description": "A fast, distributed gradient boosting framework using histogram-based algorithms for efficient training on large datasets.",
+    "developer": "Microsoft",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "R",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "SciPy"
+    ],
+    "social_impact": "Used in large-scale recommendation engines, real-time bidding platforms, and patient outcome prediction in hospital systems.",
+    "example_code": "import lightgbm as lgb\nfrom sklearn.datasets import load_iris\nX, y = load_iris(return_X_y=True)\nmodel = lgb.LGBMClassifier()\nmodel.fit(X, y)\nprint(model.predict(X[:3]))",
+    "official_url": "https://lightgbm.readthedocs.io",
+    "tags": [
+      "gradient-boosting",
+      "fast",
+      "tabular-data",
+      "lightgbm"
+    ],
+    "use_cases": [
+      "large-scale tabular ML",
+      "ranking systems",
+      "click-through rate prediction"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 8,
+    "name": "CatBoost",
+    "category": "MLOps / LLMOps",
+    "function": "Gradient Boosting Library",
+    "description": "A gradient boosting library by Yandex that handles categorical features natively without manual encoding, reducing preprocessing effort.",
+    "developer": "Yandex",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "R",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "pandas"
+    ],
+    "social_impact": "Used in e-commerce ranking, healthcare risk stratification, and financial credit scoring where datasets contain many categorical variables.",
+    "example_code": "from catboost import CatBoostClassifier\nfrom sklearn.datasets import load_iris\nX, y = load_iris(return_X_y=True)\nmodel = CatBoostClassifier(verbose=0)\nmodel.fit(X, y)\nprint(model.predict(X[:3]))",
+    "official_url": "https://catboost.ai",
+    "tags": [
+      "gradient-boosting",
+      "categorical-features",
+      "catboost"
+    ],
+    "use_cases": [
+      "categorical feature handling",
+      "tabular ML",
+      "recommendation systems"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 9,
+    "name": "Dask-ML",
+    "category": "MLOps / LLMOps",
+    "function": "Scalable ML Library",
+    "description": "A scalable machine learning library built on top of Dask, enabling parallel and distributed computation for datasets that exceed memory limits.",
+    "developer": "Dask Community",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "Dask",
+      "NumPy",
+      "Scikit-learn"
+    ],
+    "social_impact": "Used in genomics pipelines, large-scale epidemiological studies, and climate science where datasets are too large for single-machine processing.",
+    "example_code": "import dask.array as da\nfrom dask_ml.linear_model import LinearRegression\nX = da.random.random((100, 4), chunks=50)\ny = da.random.random(100, chunks=50)\nmodel = LinearRegression()\nmodel.fit(X, y)",
+    "official_url": "https://ml.dask.org",
+    "tags": [
+      "distributed-ml",
+      "scalable",
+      "pandas-compatible",
+      "dask"
+    ],
+    "use_cases": [
+      "large-scale model training",
+      "distributed preprocessing",
+      "scalable ML pipelines"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 10,
+    "name": "MLflow",
+    "category": "MLOps / LLMOps",
+    "function": "ML Lifecycle Platform",
+    "description": "An open-source platform for managing the full machine learning lifecycle, including experiment tracking, model packaging, and deployment.",
+    "developer": "Databricks",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "pandas",
+      "scikit-learn"
+    ],
+    "social_impact": "Used by teams in regulated industries such as finance and healthcare to maintain reproducibility, audit trails, and compliance in ML deployments.",
+    "example_code": "import mlflow\nwith mlflow.start_run():\n    mlflow.log_param('learning_rate', 0.01)\n    mlflow.log_metric('accuracy', 0.95)\n    print('Run logged successfully')",
+    "official_url": "https://mlflow.org",
+    "tags": [
+      "experiment-tracking",
+      "model-registry",
+      "mlops",
+      "versioning",
+      "deployment"
+    ],
+    "use_cases": [
+      "track ML experiments",
+      "version models",
+      "compare runs",
+      "deploy ML models",
+      "model monitoring"
+    ],
+    "url_status": "valid",
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stars": 24912,
+    "scope": "in_scope_primary",
+    "type": "mlops-tool"
+  },
+  {
+    "id": 11,
+    "name": "Hugging Face Transformers",
+    "category": "LLM / Generative AI",
+    "function": "NLP Model Library",
+    "description": "A library providing thousands of pretrained transformer models for NLP, computer vision, and audio tasks, with support for PyTorch, TensorFlow, and JAX.",
+    "developer": "Hugging Face",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "PyTorch",
+      "TensorFlow",
+      "NumPy",
+      "tokenizers"
+    ],
+    "social_impact": "Used in clinical note summarization, multilingual chatbots, and automated legal document analysis across the public and private sectors.",
+    "example_code": "from transformers import pipeline\nclassifier = pipeline('sentiment-analysis')\nresult = classifier('I love building AI projects!')\nprint(result)",
+    "official_url": "https://huggingface.co/transformers",
+    "tags": [
+      "transformers",
+      "llm",
+      "bert",
+      "gpt",
+      "huggingface",
+      "nlp",
+      "fine-tuning"
+    ],
+    "use_cases": [
+      "fine-tune LLMs",
+      "text classification",
+      "named entity recognition",
+      "question answering",
+      "text generation"
+    ],
+    "url_status": "valid",
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stars": 158262,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 12,
+    "name": "DeepSpeed",
+    "category": "Fine-Tuning / Training",
+    "function": "Distributed Training Library",
+    "description": "A deep learning optimization library from Microsoft that enables efficient training of very large models using techniques like ZeRO memory optimization and pipeline parallelism.",
+    "developer": "Microsoft",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux"
+    ],
+    "dependencies": [
+      "PyTorch",
+      "CUDA",
+      "cuDNN"
+    ],
+    "social_impact": "Enables smaller organizations to train large language models by significantly reducing GPU memory requirements and training time.",
+    "example_code": "import deepspeed\nimport torch\nmodel = torch.nn.Linear(10, 1)\nengine, _, _, _ = deepspeed.initialize(model=model, config='ds_config.json')\nprint('DeepSpeed engine initialized')",
+    "official_url": "https://www.deepspeed.ai",
+    "tags": [
+      "distributed-training",
+      "large-models",
+      "gpu",
+      "zero-optimization"
+    ],
+    "use_cases": [
+      "train LLMs on multiple GPUs",
+      "reduce memory for large models",
+      "distributed fine-tuning"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "id": 13,
+    "name": "JAX",
+    "category": "Fine-Tuning / Training",
+    "function": "Numerical Computing Library",
+    "description": "A library by Google for high-performance numerical computing with automatic differentiation and XLA compilation, used in advanced ML research.",
+    "developer": "Google",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "CUDA (optional)"
+    ],
+    "social_impact": "Used in protein structure prediction research (AlphaFold), climate simulation, and large-scale physics modeling in scientific computing.",
+    "example_code": "import jax.numpy as jnp\nfrom jax import grad\nf = lambda x: x ** 2 + 3 * x\ndf = grad(f)\nprint(df(2.0))",
+    "official_url": "https://jax.readthedocs.io",
+    "tags": [
+      "jax",
+      "functional",
+      "accelerator",
+      "tpu",
+      "gpu",
+      "autograd"
+    ],
+    "use_cases": [
+      "high-performance ML research",
+      "custom neural networks",
+      "TPU training",
+      "hardware-accelerated ML"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "id": 14,
+    "name": "ONNX",
+    "category": "Model Serving / Inference",
+    "function": "AI Model Interoperability Format",
+    "description": "An open format for representing machine learning models, enabling seamless transfer of models between different frameworks and deployment environments.",
+    "developer": "Linux Foundation AI",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "protobuf"
+    ],
+    "social_impact": "Enables AI model portability in healthcare devices, edge computing, and cross-platform enterprise software without vendor lock-in.",
+    "example_code": "import onnx\nmodel = onnx.load('model.onnx')\nonnx.checker.check_model(model)\nprint('ONNX model is valid')",
+    "official_url": "https://onnx.ai",
+    "tags": [
+      "model-interoperability",
+      "onnx",
+      "inference",
+      "export",
+      "cross-platform"
+    ],
+    "use_cases": [
+      "export models across frameworks",
+      "optimize inference",
+      "deploy to edge devices",
+      "model portability"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "id": 15,
+    "name": "Apache MXNet",
+    "category": "Fine-Tuning / Training",
+    "function": "Deep Learning Framework",
+    "description": "A scalable deep learning framework supporting multiple programming languages. Note: Apache MXNet was retired by the Apache Software Foundation in September 2023 and is no longer actively maintained.",
+    "developer": "Apache Software Foundation",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "R",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "CUDA (optional)"
+    ],
+    "social_impact": "Was used in large-scale e-commerce personalization and content moderation at platforms like Amazon before its retirement.",
+    "example_code": "import mxnet as mx\nfrom mxnet import nd\nx = nd.array([[1, 2], [3, 4]])\nprint(x)\nprint(x.shape)",
+    "official_url": "https://mxnet.apache.org",
+    "tags": [
+      "deep-learning",
+      "mxnet",
+      "apache",
+      "distributed"
+    ],
+    "use_cases": [
+      "distributed model training",
+      "deep learning research",
+      "cloud ML deployment"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "id": 16,
+    "name": "spaCy",
+    "category": "NLP",
+    "function": "NLP Library",
+    "description": "An industrial-strength NLP library for Python offering fast and accurate pipelines for tokenization, named entity recognition, dependency parsing, and more.",
+    "developer": "Explosion AI",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "cymem",
+      "murmurhash"
+    ],
+    "social_impact": "Used in legal document parsing, electronic health record extraction, and automated journalism to process large volumes of unstructured text.",
+    "example_code": "import spacy\nnlp = spacy.load('en_core_web_sm')\ndoc = nlp('Apple is looking at buying a startup.')\nfor ent in doc.ents:\n    print(ent.text, ent.label_)",
+    "official_url": "https://spacy.io",
+    "tags": [
+      "nlp",
+      "spacy",
+      "tokenization",
+      "ner",
+      "dependency-parsing",
+      "text-processing"
+    ],
+    "use_cases": [
+      "named entity recognition",
+      "dependency parsing",
+      "text classification",
+      "information extraction",
+      "NLP pipelines"
+    ],
+    "url_status": "valid",
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stars": 33371,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 17,
+    "name": "NLTK",
+    "category": "NLP",
+    "function": "Text Processing Library",
+    "description": "The Natural Language Toolkit, a comprehensive Python platform for working with human language data, widely used in academic NLP education and research.",
+    "developer": "University of Pennsylvania",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "regex"
+    ],
+    "social_impact": "Used in public health surveillance systems that analyze social media to detect disease outbreaks, and in educational tools for automated language assessment.",
+    "example_code": "import nltk\nnltk.download('punkt', quiet=True)\nfrom nltk.tokenize import word_tokenize\ntext = 'Hello, welcome to SLIBAI!'\ntokens = word_tokenize(text)\nprint(tokens)",
+    "official_url": "https://www.nltk.org",
+    "tags": [
+      "nlp",
+      "nltk",
+      "tokenization",
+      "stemming",
+      "pos-tagging",
+      "text-processing"
+    ],
+    "use_cases": [
+      "text preprocessing",
+      "tokenization",
+      "part-of-speech tagging",
+      "sentiment analysis",
+      "NLP education"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 18,
+    "name": "Stanza",
+    "category": "NLP",
+    "function": "NLP Tools Suite",
+    "description": "A Python NLP toolkit developed by Stanford supporting over 70 languages, providing accurate linguistic analysis including tokenization, POS tagging, and named entity recognition.",
+    "developer": "Stanford University",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "PyTorch",
+      "protobuf"
+    ],
+    "social_impact": "Supports multilingual NLP for low-resource languages, used in cross-lingual humanitarian information retrieval and academic linguistic research.",
+    "example_code": "import stanza\nstanza.download('en')\nnlp = stanza.Pipeline('en')\ndoc = nlp('Stanford NLP is powerful.')\nfor sent in doc.sentences:\n    print([word.text for word in sent.words])",
+    "official_url": "https://stanfordnlp.github.io/stanza",
+    "tags": [
+      "nlp",
+      "multilingual",
+      "ner",
+      "pos",
+      "stanza",
+      "stanford"
+    ],
+    "use_cases": [
+      "multilingual NLP",
+      "named entity recognition",
+      "dependency parsing",
+      "biomedical NLP"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 19,
+    "name": "TextBlob",
+    "category": "NLP",
+    "function": "Text Processing Library",
+    "description": "A simple Python library for processing textual data, offering an easy-to-use API for common NLP tasks including sentiment analysis, POS tagging, and noun phrase extraction.",
+    "developer": "Steven Loria",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "NLTK",
+      "pattern"
+    ],
+    "social_impact": "Used in social media monitoring for mental health research and product feedback analysis, enabling rapid sentiment-based decision making.",
+    "example_code": "from textblob import TextBlob\nblob = TextBlob('SLIBAI is an amazing project!')\nprint(blob.sentiment)\nprint(blob.tags)",
+    "official_url": "https://textblob.readthedocs.io",
+    "tags": [
+      "nlp",
+      "sentiment-analysis",
+      "text-processing",
+      "simple-api"
+    ],
+    "use_cases": [
+      "sentiment analysis",
+      "noun phrase extraction",
+      "text translation",
+      "simple NLP tasks"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 20,
+    "name": "AllenNLP",
+    "category": "NLP",
+    "function": "NLP Research Library",
+    "description": "A PyTorch-based NLP research library built by AI2, designed for building and evaluating deep learning models for language tasks. Note: AllenNLP was deprecated by the Allen Institute for AI in June 2022 and is no longer maintained.",
+    "developer": "Allen Institute for AI",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "macOS"
+    ],
+    "dependencies": [
+      "PyTorch",
+      "transformers",
+      "spaCy"
+    ],
+    "social_impact": "Advanced NLP research for scientific literature analysis and clinical note processing before its deprecation in 2022.",
+    "example_code": "from allennlp.predictors.predictor import Predictor\npredictor = Predictor.from_path('https://storage.googleapis.com/allennlp-public-models/bert-base-srl-2020.11.19.tar.gz')\nresult = predictor.predict(sentence='SLIBAI helps developers find AI tools.')\nprint(result['verbs'])",
+    "official_url": "https://allennlp.org",
+    "tags": [
+      "nlp",
+      "research",
+      "reading-comprehension",
+      "semantic-role-labeling"
+    ],
+    "use_cases": [
+      "NLP research",
+      "reading comprehension",
+      "semantic role labeling",
+      "coreference resolution"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "527591471",
+    "name": "Stable Diffusion WebUI",
+    "category": "Model Serving / Inference",
+    "function": "Image Generation Runtime",
+    "description": "Stable Diffusion web UI",
+    "developer": "AUTOMATIC1111",
+    "version": "latest",
+    "cost": "Check Repository",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 161,949 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+    "tags": [
+      "stable-diffusion",
+      "image-generation",
+      "model-runtime",
+      "local-inference",
+      "generative-ai"
+    ],
+    "use_cases": [
+      "run image generation models locally",
+      "fine-tune Stable Diffusion",
+      "build image generation apps",
+      "test diffusion models"
+    ],
+    "url_status": "valid",
+    "stars": 161949,
+    "github_url": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+    "last_updated": "2026-03-23T02:09:52Z",
+    "id": 21,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "platform"
+  },
+  {
+    "source": "github",
+    "source_id": "24976755",
+    "name": "HanLP",
+    "category": "NLP",
+    "function": "Multilingual NLP Library",
+    "description": "中文分词 词性标注 命名实体识别 依存句法分析 成分句法分析 语义依存分析 语义角色标注 指代消解 风格转换 语义相似度 新词发现 关键词短语提取 自动摘要 文本分类聚类 拼音简繁转换 自然语言处理",
+    "developer": "hankcs",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 36,211 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://www.hanlp.com/",
+    "tags": [
+      "nlp",
+      "chinese-nlp",
+      "multilingual",
+      "tokenization",
+      "ner",
+      "pos-tagging"
+    ],
+    "use_cases": [
+      "Chinese NLP pipelines",
+      "multilingual text analysis",
+      "named entity recognition",
+      "dependency parsing"
+    ],
+    "url_status": "valid",
+    "stars": 36211,
+    "github_url": "https://github.com/hankcs/HanLP",
+    "last_updated": "2026-03-23T00:00:03Z",
+    "id": 22,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "571613891",
+    "name": "Supervision",
+    "category": "Computer Vision",
+    "function": "Computer Vision Utilities",
+    "description": "We write your reusable computer vision tools. 💜",
+    "developer": "roboflow",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 36,755 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://supervision.roboflow.com",
+    "tags": [
+      "computer-vision",
+      "object-detection",
+      "annotation",
+      "roboflow",
+      "visualization"
+    ],
+    "use_cases": [
+      "annotate detection results",
+      "track objects in video",
+      "build CV pipelines",
+      "dataset management for vision"
+    ],
+    "url_status": "valid",
+    "stars": 36755,
+    "github_url": "https://github.com/roboflow/supervision",
+    "last_updated": "2026-03-23T00:57:35Z",
+    "id": 23,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "191820100",
+    "name": "MediaPipe",
+    "category": "Computer Vision",
+    "function": "On-Device ML Framework",
+    "description": "Cross-platform, customizable ML solutions for live and streaming media.",
+    "developer": "google-ai-edge",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "C++",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 34,252 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://ai.google.dev/edge/mediapipe",
+    "tags": [
+      "mediapipe",
+      "pose-estimation",
+      "hand-tracking",
+      "face-detection",
+      "on-device-ml",
+      "google"
+    ],
+    "use_cases": [
+      "real-time pose estimation",
+      "hand gesture recognition",
+      "face mesh detection",
+      "on-device ML apps",
+      "augmented reality"
+    ],
+    "url_status": "valid",
+    "stars": 34252,
+    "github_url": "https://github.com/google-ai-edge/mediapipe",
+    "last_updated": "2026-03-22T17:19:01Z",
+    "id": 24,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "89247811",
+    "name": "OpenPose",
+    "category": "Computer Vision",
+    "function": "Human Pose Estimation",
+    "description": "OpenPose: Real-time multi-person keypoint detection library for body, face, hands, and foot estimation",
+    "developer": "CMU-Perceptual-Computing-Lab",
+    "version": "latest",
+    "cost": "See Repository",
+    "compatibility": [
+      "C++",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 33,886 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://cmu-perceptual-computing-lab.github.io/openpose",
+    "tags": [
+      "pose-estimation",
+      "human-pose",
+      "keypoint-detection",
+      "body-tracking"
+    ],
+    "use_cases": [
+      "human body pose estimation",
+      "action recognition",
+      "fitness tracking",
+      "motion capture"
+    ],
+    "url_status": "valid",
+    "stars": 33886,
+    "github_url": "https://github.com/CMU-Perceptual-Computing-Lab/openpose",
+    "last_updated": "2026-03-23T01:33:06Z",
+    "id": 25,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "599320067",
+    "name": "Langflow",
+    "category": "AI Agents",
+    "function": "Visual LLM App Builder",
+    "description": "Langflow is a powerful tool for building and deploying AI-powered agents and workflows.",
+    "developer": "langflow-ai",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 146,063 developers on GitHub.",
+    "example_code": "",
+    "official_url": "http://www.langflow.org",
+    "tags": [
+      "langchain",
+      "visual-builder",
+      "llm",
+      "low-code",
+      "rag",
+      "agents"
+    ],
+    "use_cases": [
+      "build RAG pipelines visually",
+      "prototype LLM apps",
+      "create chatflow agents",
+      "no-code AI workflows"
+    ],
+    "url_status": "valid",
+    "stars": 146063,
+    "github_url": "https://github.com/langflow-ai/langflow",
+    "last_updated": "2026-03-23T02:08:05Z",
+    "id": 26,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "platform"
+  },
+  {
+    "source": "github",
+    "source_id": "676672661",
+    "name": "LangGraph",
+    "category": "AI Agents",
+    "function": "Stateful Agent Graph Framework",
+    "description": "Build resilient language agents as graphs.",
+    "developer": "langchain-ai",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 27,167 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://docs.langchain.com/oss/python/langgraph/",
+    "tags": [
+      "agents",
+      "langgraph",
+      "stateful",
+      "multi-agent",
+      "orchestration",
+      "llm"
+    ],
+    "use_cases": [
+      "build stateful multi-agent workflows",
+      "cyclic agent graphs",
+      "human-in-the-loop AI",
+      "complex agent orchestration"
+    ],
+    "url_status": "valid",
+    "stars": 27167,
+    "github_url": "https://github.com/langchain-ai/langgraph",
+    "last_updated": "2026-03-23T02:10:12Z",
+    "id": 27,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "agent-framework"
+  },
+  {
+    "source": "github",
+    "source_id": "221654678",
+    "name": "Haystack",
+    "category": "AI Agents",
+    "function": "NLP / RAG Pipeline Framework",
+    "description": "Open-source AI orchestration framework for building context-engineered, production-ready LLM applications. Design modular pipelines and agent workflows with explicit control over retrieval, routing, memory, and generation. Built for scalable agents, RAG, multimodal applications, semantic search, and conversational systems.",
+    "developer": "deepset-ai",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "MDX"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 24,586 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://haystack.deepset.ai",
+    "tags": [
+      "rag",
+      "nlp",
+      "pipelines",
+      "search",
+      "haystack",
+      "question-answering"
+    ],
+    "use_cases": [
+      "build search systems",
+      "RAG pipelines",
+      "document retrieval",
+      "question answering",
+      "enterprise NLP"
+    ],
+    "url_status": "valid",
+    "stars": 24586,
+    "github_url": "https://github.com/deepset-ai/haystack",
+    "last_updated": "2026-03-23T00:05:44Z",
+    "id": 28,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "658928958",
+    "name": "Ollama",
+    "category": "Model Serving / Inference",
+    "function": "Local LLM Runtime",
+    "description": "Get up and running with Kimi-K2.5, GLM-5, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.",
+    "developer": "ollama",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Go",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 165,893 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://ollama.com",
+    "tags": [
+      "local-llm",
+      "llm",
+      "ollama",
+      "local-inference",
+      "model-runtime",
+      "llama",
+      "mistral"
+    ],
+    "use_cases": [
+      "run LLMs locally",
+      "private AI inference",
+      "offline chatbot",
+      "local model serving",
+      "developer LLM testing"
+    ],
+    "url_status": "valid",
+    "stars": 165893,
+    "github_url": "https://github.com/ollama/ollama",
+    "last_updated": "2026-03-23T01:59:36Z",
+    "id": 29,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "626805178",
+    "name": "Dify",
+    "category": "AI Developer Platforms",
+    "function": "LLMOps Platform",
+    "description": "Production-ready platform for agentic workflow development.",
+    "developer": "langgenius",
+    "version": "latest",
+    "cost": "See Repository",
+    "compatibility": [
+      "TypeScript",
+      "Node.js",
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 133,982 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://dify.ai",
+    "tags": [
+      "llmops",
+      "llm",
+      "platform",
+      "rag",
+      "agents",
+      "workflow",
+      "dify"
+    ],
+    "use_cases": [
+      "build LLM-powered apps",
+      "RAG workflow automation",
+      "AI agent orchestration",
+      "prompt management",
+      "LLM observability"
+    ],
+    "url_status": "valid",
+    "stars": 133982,
+    "github_url": "https://github.com/langgenius/dify",
+    "last_updated": "2026-03-23T02:09:00Z",
+    "id": 30,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "platform"
+  },
+  {
+    "source": "github",
+    "source_id": "701547123",
+    "name": "Open WebUI",
+    "category": "Model Serving / Inference",
+    "function": "Local LLM UI Platform",
+    "description": "User-friendly AI Interface (Supports Ollama, OpenAI API, ...)",
+    "developer": "open-webui",
+    "version": "latest",
+    "cost": "See Repository",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 128,298 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://openwebui.com",
+    "tags": [
+      "local-llm",
+      "open-webui",
+      "ui",
+      "ollama",
+      "model-interface",
+      "self-hosted"
+    ],
+    "use_cases": [
+      "self-host LLM chat UI",
+      "connect to local models",
+      "Ollama frontend",
+      "private ChatGPT alternative"
+    ],
+    "url_status": "valid",
+    "stars": 128298,
+    "github_url": "https://github.com/open-webui/open-webui",
+    "last_updated": "2026-03-23T02:00:30Z",
+    "id": 31,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "platform"
+  },
+  {
+    "source": "github",
+    "source_id": "787076358",
+    "name": "Firecrawl",
+    "category": "AI Developer Platforms",
+    "function": "Web Scraping API for AI",
+    "description": "🔥 The Web Data API for AI - Turn entire websites into LLM-ready markdown or structured data",
+    "developer": "firecrawl",
+    "version": "latest",
+    "cost": "Check Repository",
+    "compatibility": [
+      "TypeScript",
+      "Node.js",
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 96,592 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://firecrawl.dev",
+    "tags": [
+      "web-scraping",
+      "rag",
+      "data-ingestion",
+      "markdown",
+      "llm-data",
+      "firecrawl"
+    ],
+    "use_cases": [
+      "scrape web data for RAG",
+      "build LLM training datasets",
+      "feed web content to AI agents",
+      "structured data extraction"
+    ],
+    "url_status": "valid",
+    "stars": 96592,
+    "github_url": "https://github.com/firecrawl/firecrawl",
+    "last_updated": "2026-03-23T02:17:50Z",
+    "id": 32,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "developer-tool"
+  },
+  {
+    "source": "github",
+    "source_id": "881458615",
+    "name": "Browser Use",
+    "category": "AI Agents",
+    "function": "AI Browser Automation Agent",
+    "description": "🌐 Make websites accessible for AI agents. Automate tasks online with ease.",
+    "developer": "browser-use",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 82,650 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://browser-use.com",
+    "tags": [
+      "browser-automation",
+      "agents",
+      "web-agent",
+      "playwright",
+      "llm",
+      "autonomous"
+    ],
+    "use_cases": [
+      "automate browser tasks with AI",
+      "web scraping agents",
+      "UI testing with LLMs",
+      "autonomous web navigation"
+    ],
+    "url_status": "valid",
+    "stars": 82650,
+    "github_url": "https://github.com/browser-use/browser-use",
+    "last_updated": "2026-03-23T02:19:07Z",
+    "id": 33,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "agent-framework"
+  },
+  {
+    "source": "github",
+    "source_id": "725205304",
+    "name": "Unsloth",
+    "category": "Fine-Tuning / Training",
+    "function": "Fast LLM Fine-Tuning Framework",
+    "description": "Unified web UI for training and running open models like Qwen, DeepSeek, gpt-oss and Gemma locally.",
+    "developer": "unslothai",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 57,579 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://unsloth.ai/docs",
+    "tags": [
+      "fine-tuning",
+      "lora",
+      "qlora",
+      "llm",
+      "fast",
+      "memory-efficient",
+      "unsloth"
+    ],
+    "use_cases": [
+      "fine-tune LLMs 2x faster",
+      "LoRA/QLoRA fine-tuning",
+      "low-memory LLM training",
+      "custom model adaptation"
+    ],
+    "url_status": "valid",
+    "stars": 57579,
+    "github_url": "https://github.com/unslothai/unsloth",
+    "last_updated": "2026-03-23T02:18:34Z",
+    "id": 34,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "71932349",
+    "name": "Ray",
+    "category": "MLOps / LLMOps",
+    "function": "Distributed ML Compute Framework",
+    "description": "Ray is an AI compute engine. Ray consists of a core distributed runtime and a set of AI Libraries for accelerating ML workloads.",
+    "developer": "ray-project",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 41,841 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://ray.io",
+    "tags": [
+      "distributed",
+      "ray",
+      "parallel",
+      "scaling",
+      "ml-training",
+      "cluster"
+    ],
+    "use_cases": [
+      "distributed model training",
+      "hyperparameter tuning at scale",
+      "parallel ML workloads",
+      "large-scale data processing"
+    ],
+    "url_status": "valid",
+    "stars": 41841,
+    "github_url": "https://github.com/ray-project/ray",
+    "last_updated": "2026-03-23T00:06:39Z",
+    "id": 35,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "740303686",
+    "name": "SGLang",
+    "category": "Model Serving / Inference",
+    "function": "LLM Serving Framework",
+    "description": "SGLang is a high-performance serving framework for large language models and multimodal models.",
+    "developer": "sgl-project",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 24,876 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://sglang.io",
+    "tags": [
+      "llm-serving",
+      "inference",
+      "throughput",
+      "sglang",
+      "model-serving",
+      "structured-output"
+    ],
+    "use_cases": [
+      "high-throughput LLM serving",
+      "structured output generation",
+      "batch LLM inference",
+      "low-latency model deployment"
+    ],
+    "url_status": "valid",
+    "stars": 24876,
+    "github_url": "https://github.com/sgl-project/sglang",
+    "last_updated": "2026-03-23T02:17:27Z",
+    "id": 36,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "102904613",
+    "name": "Unity ML-Agents",
+    "category": "AI Agents",
+    "function": "Reinforcement Learning Simulation Framework",
+    "description": "The Unity Machine Learning Agents Toolkit (ML-Agents) is an open-source project that enables games and simulations to serve as environments for training intelligent agents using deep reinforcement learning and imitation learning.",
+    "developer": "Unity-Technologies",
+    "version": "latest",
+    "cost": "See Repository",
+    "compatibility": [
+      "C#"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 19,247 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://unity.com/products/machine-learning-agents",
+    "tags": [
+      "reinforcement-learning",
+      "rl",
+      "unity",
+      "simulation",
+      "agents",
+      "game-ai"
+    ],
+    "use_cases": [
+      "train RL agents in simulations",
+      "game AI development",
+      "robotic simulation",
+      "multi-agent environments"
+    ],
+    "url_status": "valid",
+    "stars": 19247,
+    "github_url": "https://github.com/Unity-Technologies/ml-agents",
+    "last_updated": "2026-03-22T22:18:01Z",
+    "id": 37,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "600544354",
+    "name": "FinGPT",
+    "category": "LLM / Generative AI",
+    "function": "Financial LLM Framework",
+    "description": "FinGPT: Open-Source Financial Large Language Models!  Revolutionize 🔥    We release the trained model on HuggingFace.",
+    "developer": "AI4Finance-Foundation",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Jupyter Notebook"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 18,894 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://ai4finance.org/research/fingpt-open-source-finllm.html",
+    "tags": [
+      "llm",
+      "finance",
+      "fintech",
+      "fine-tuning",
+      "financial-nlp",
+      "fingpt"
+    ],
+    "use_cases": [
+      "financial sentiment analysis",
+      "earnings call summarization",
+      "financial chatbots",
+      "fine-tune LLMs on finance data"
+    ],
+    "url_status": "valid",
+    "stars": 18894,
+    "github_url": "https://github.com/AI4Finance-Foundation/FinGPT",
+    "last_updated": "2026-03-22T22:40:26Z",
+    "id": 38,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "33884891",
+    "name": "Apache Airflow",
+    "category": "MLOps / LLMOps",
+    "function": "ML Pipeline Orchestration",
+    "description": "Apache Airflow - A platform to programmatically author, schedule, and monitor workflows",
+    "developer": "apache",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 44,746 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://airflow.apache.org/",
+    "tags": [
+      "pipeline-orchestration",
+      "mlops",
+      "workflow",
+      "dag",
+      "airflow",
+      "scheduling"
+    ],
+    "use_cases": [
+      "orchestrate ML training pipelines",
+      "schedule data preprocessing",
+      "automate model retraining",
+      "ML workflow management"
+    ],
+    "url_status": "valid",
+    "stars": 44746,
+    "github_url": "https://github.com/apache/airflow",
+    "last_updated": "2026-03-23T01:22:54Z",
+    "id": 39,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "mlops-tool"
+  },
+  {
+    "source": "github",
+    "source_id": "268163609",
+    "name": "Qdrant",
+    "category": "Vector Databases",
+    "function": "Vector Search Engine",
+    "description": "Qdrant - High-performance, massive-scale Vector Database and Vector Search Engine for the next generation of AI. Also available in the cloud https://cloud.qdrant.io/",
+    "developer": "qdrant",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Rust",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 29,778 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://qdrant.tech",
+    "tags": [
+      "vector-database",
+      "embeddings",
+      "semantic-search",
+      "rag",
+      "similarity-search",
+      "qdrant"
+    ],
+    "use_cases": [
+      "semantic search",
+      "RAG systems",
+      "recommendation engines",
+      "similarity search",
+      "embedding storage"
+    ],
+    "url_status": "valid",
+    "stars": 29778,
+    "github_url": "https://github.com/qdrant/qdrant",
+    "last_updated": "2026-03-23T01:59:40Z",
+    "id": 40,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "vector-database"
+  },
+  {
+    "source": "github",
+    "source_id": "192640529",
+    "name": "Label Studio",
+    "category": "Data Labeling / Dataset Tools",
+    "function": "Data Annotation Platform",
+    "description": "Label Studio is a multi-type data labeling and annotation tool with standardized output format",
+    "developer": "HumanSignal",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "TypeScript",
+      "Node.js",
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 26,803 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://labelstud.io",
+    "tags": [
+      "data-labeling",
+      "annotation",
+      "dataset",
+      "ground-truth",
+      "active-learning"
+    ],
+    "use_cases": [
+      "label training data",
+      "annotate images for CV",
+      "create NLP datasets",
+      "active learning workflows",
+      "multimodal annotation"
+    ],
+    "url_status": "valid",
+    "stars": 26803,
+    "github_url": "https://github.com/HumanSignal/label-studio",
+    "last_updated": "2026-03-23T00:28:45Z",
+    "id": 41,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "developer-tool"
+  },
+  {
+    "source": "github",
+    "source_id": "240315046",
+    "name": "Ray Serve",
+    "category": "Model Serving / Inference",
+    "function": "Scalable Model Serving",
+    "description": "☁️ Build multimodal AI applications with cloud-native stack",
+    "developer": "jina-ai",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 21,853 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://jina.ai/serve",
+    "tags": [
+      "model-serving",
+      "ray",
+      "inference",
+      "scalable",
+      "deployment",
+      "api-serving"
+    ],
+    "use_cases": [
+      "serve ML models as APIs",
+      "scalable inference",
+      "online serving",
+      "batch inference",
+      "model A/B testing"
+    ],
+    "url_status": "valid",
+    "stars": 21853,
+    "github_url": "https://github.com/jina-ai/serve",
+    "last_updated": "2026-03-22T15:27:34Z",
+    "id": 42,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "460914281",
+    "name": "Taipy",
+    "category": "AI Developer Platforms",
+    "function": "AI Application Builder",
+    "description": "Turns Data and AI algorithms into production-ready web applications in no time.",
+    "developer": "Avaiga",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 19,123 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://www.taipy.io",
+    "tags": [
+      "ai-apps",
+      "python",
+      "dashboard",
+      "pipeline",
+      "taipy",
+      "data-apps"
+    ],
+    "use_cases": [
+      "build AI-powered dashboards",
+      "data pipeline visualization",
+      "deploy ML apps",
+      "create AI web apps with Python"
+    ],
+    "url_status": "valid",
+    "stars": 19123,
+    "github_url": "https://github.com/Avaiga/taipy",
+    "last_updated": "2026-03-22T19:16:40Z",
+    "id": 43,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "platform"
+  },
+  {
+    "source": "github",
+    "source_id": "211124697",
+    "name": "Spleeter",
+    "category": "Speech / Audio AI",
+    "function": "Audio Source Separation Library",
+    "description": "Deezer source separation library including pretrained models.",
+    "developer": "deezer",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 28,111 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://research.deezer.com/projects/spleeter.html",
+    "tags": [
+      "audio-separation",
+      "music",
+      "vocals",
+      "spleeter",
+      "source-separation"
+    ],
+    "use_cases": [
+      "separate vocals from music",
+      "stem extraction for production",
+      "audio preprocessing for AI",
+      "music analysis"
+    ],
+    "url_status": "valid",
+    "stars": 28111,
+    "github_url": "https://github.com/deezer/spleeter",
+    "last_updated": "2026-03-23T01:14:15Z",
+    "id": 44,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "259710503",
+    "name": "SpeechBrain",
+    "category": "Speech / Audio AI",
+    "function": "Speech AI Toolkit",
+    "description": "A PyTorch-based Speech Toolkit",
+    "developer": "speechbrain",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 11,354 developers on GitHub.",
+    "example_code": "",
+    "official_url": "http://speechbrain.github.io",
+    "tags": [
+      "speech",
+      "asr",
+      "tts",
+      "speaker-verification",
+      "speechbrain",
+      "audio-ai"
+    ],
+    "use_cases": [
+      "automatic speech recognition",
+      "text-to-speech",
+      "speaker identification",
+      "speech enhancement",
+      "emotion recognition from audio"
+    ],
+    "url_status": "valid",
+    "stars": 11354,
+    "github_url": "https://github.com/speechbrain/speechbrain",
+    "last_updated": "2026-03-22T21:44:53Z",
+    "id": 45,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "895253710",
+    "name": "MLX Audio",
+    "category": "Speech / Audio AI",
+    "function": "Apple Silicon Audio AI Library",
+    "description": "A text-to-speech (TTS), speech-to-text (STT) and speech-to-speech (STS) library built on Apple's MLX framework, providing efficient speech analysis on Apple Silicon.",
+    "developer": "Blaizzy",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 6,353 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/Blaizzy/mlx-audio",
+    "tags": [
+      "audio",
+      "apple-silicon",
+      "mlx",
+      "tts",
+      "asr",
+      "local-inference"
+    ],
+    "use_cases": [
+      "run audio AI on Apple Silicon",
+      "local TTS on Mac",
+      "local ASR on Mac",
+      "optimized audio inference"
+    ],
+    "url_status": "valid",
+    "stars": 6353,
+    "github_url": "https://github.com/Blaizzy/mlx-audio",
+    "last_updated": "2026-03-23T01:38:02Z",
+    "id": 46,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "135768037",
+    "name": "NVIDIA DALI",
+    "category": "Fine-Tuning / Training",
+    "function": "GPU Data Loading Library",
+    "description": "A GPU-accelerated library containing highly optimized building blocks and an execution engine for data processing to accelerate deep learning training and inference applications.",
+    "developer": "NVIDIA",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "C++",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 5,648 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://docs.nvidia.com/deeplearning/dali/user-guide/docs/index.html",
+    "tags": [
+      "data-pipeline",
+      "gpu",
+      "training",
+      "nvidia",
+      "dali",
+      "image-preprocessing"
+    ],
+    "use_cases": [
+      "fast GPU data loading for training",
+      "image preprocessing pipeline",
+      "accelerate training data throughput",
+      "NVIDIA GPU optimization"
+    ],
+    "url_status": "valid",
+    "stars": 5648,
+    "github_url": "https://github.com/NVIDIA/DALI",
+    "last_updated": "2026-03-22T10:54:50Z",
+    "id": 47,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "541269386",
+    "name": "Whisper.cpp",
+    "category": "Model Serving / Inference",
+    "function": "Local Whisper Inference Runtime",
+    "description": "Port of OpenAI's Whisper model in C/C++",
+    "developer": "ggml-org",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "C++",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 47,843 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/ggml-org/whisper.cpp",
+    "tags": [
+      "whisper",
+      "local-inference",
+      "speech-to-text",
+      "c++",
+      "edge-ai",
+      "offline-asr"
+    ],
+    "use_cases": [
+      "run Whisper offline on device",
+      "edge speech recognition",
+      "local audio transcription",
+      "low-latency ASR"
+    ],
+    "url_status": "valid",
+    "stars": 47843,
+    "github_url": "https://github.com/ggml-org/whisper.cpp",
+    "last_updated": "2026-03-23T01:35:44Z",
+    "id": 48,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "600368121",
+    "name": "Faster Whisper",
+    "category": "Speech / Audio AI",
+    "function": "Optimized Whisper Inference",
+    "description": "Faster Whisper transcription with CTranslate2",
+    "developer": "SYSTRAN",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 21,652 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/SYSTRAN/faster-whisper",
+    "tags": [
+      "whisper",
+      "faster-inference",
+      "ctranslate2",
+      "asr",
+      "transcription",
+      "optimized"
+    ],
+    "use_cases": [
+      "4x faster Whisper transcription",
+      "batch audio transcription",
+      "low-latency ASR",
+      "server-side speech recognition"
+    ],
+    "url_status": "valid",
+    "stars": 21652,
+    "github_url": "https://github.com/SYSTRAN/faster-whisper",
+    "last_updated": "2026-03-23T02:11:09Z",
+    "id": 49,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "576103395",
+    "name": "WhisperX",
+    "category": "Speech / Audio AI",
+    "function": "Whisper with Word-Level Alignment",
+    "description": "WhisperX:  Automatic Speech Recognition with Word-level Timestamps (& Diarization)",
+    "developer": "m-bain",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 20,842 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/m-bain/whisperX",
+    "tags": [
+      "whisper",
+      "word-alignment",
+      "timestamps",
+      "diarization",
+      "asr",
+      "transcription"
+    ],
+    "use_cases": [
+      "word-level transcript timestamps",
+      "speaker diarization",
+      "subtitle generation",
+      "meeting transcription with speakers"
+    ],
+    "url_status": "valid",
+    "stars": 20842,
+    "github_url": "https://github.com/m-bain/whisperX",
+    "last_updated": "2026-03-23T01:59:42Z",
+    "id": 50,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "169975410",
+    "name": "Leon",
+    "category": "AI Agents",
+    "function": "Open Source Personal Assistant Framework",
+    "description": "🧠 Leon is your open-source personal assistant.",
+    "developer": "leon-ai",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "TypeScript",
+      "Node.js",
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 17,080 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://getleon.ai",
+    "tags": [
+      "personal-assistant",
+      "voice",
+      "nlp",
+      "self-hosted",
+      "agents"
+    ],
+    "use_cases": [
+      "build open source voice assistants",
+      "self-hosted AI assistant",
+      "voice-controlled automation",
+      "custom assistant modules"
+    ],
+    "url_status": "valid",
+    "stars": 17080,
+    "github_url": "https://github.com/leon-ai/leon",
+    "last_updated": "2026-03-23T00:57:27Z",
+    "id": 51,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "agent-framework"
+  },
+  {
+    "source": "github",
+    "source_id": "34275045",
+    "name": "Kaldi",
+    "category": "Speech / Audio AI",
+    "function": "Speech Recognition Toolkit",
+    "description": "kaldi-asr/kaldi is the official location of the Kaldi project.",
+    "developer": "kaldi-asr",
+    "version": "latest",
+    "cost": "See Repository",
+    "compatibility": [
+      "Shell"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 15,353 developers on GitHub.",
+    "example_code": "",
+    "official_url": "http://kaldi-asr.org",
+    "tags": [
+      "asr",
+      "kaldi",
+      "speech-recognition",
+      "hmm",
+      "acoustic-modeling"
+    ],
+    "use_cases": [
+      "custom ASR systems",
+      "acoustic model training",
+      "speech feature extraction",
+      "speaker recognition research"
+    ],
+    "url_status": "valid",
+    "stars": 15353,
+    "github_url": "https://github.com/kaldi-asr/kaldi",
+    "last_updated": "2026-03-22T15:11:25Z",
+    "id": 52,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "569959091",
+    "name": "FunASR",
+    "category": "Speech / Audio AI",
+    "function": "Industrial Speech Recognition Library",
+    "description": "A Fundamental End-to-End Speech Recognition Toolkit and Open Source SOTA Pretrained Models, Supporting Speech Recognition, Voice Activity Detection, Text Post-processing etc.",
+    "developer": "modelscope",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 15,328 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://www.funasr.com",
+    "tags": [
+      "asr",
+      "funasr",
+      "chinese-asr",
+      "paraformer",
+      "speech-recognition"
+    ],
+    "use_cases": [
+      "Chinese speech recognition",
+      "industrial ASR",
+      "real-time transcription",
+      "punctuation restoration"
+    ],
+    "url_status": "valid",
+    "stars": 15328,
+    "github_url": "https://github.com/modelscope/FunASR",
+    "last_updated": "2026-03-23T01:54:46Z",
+    "id": 53,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "206138137",
+    "name": "Vosk API",
+    "category": "Speech / Audio AI",
+    "function": "Offline Speech Recognition API",
+    "description": "Offline speech recognition API for Android, iOS, Raspberry Pi and servers with Python, Java, C# and Node",
+    "developer": "alphacep",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Jupyter Notebook"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 14,420 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/alphacep/vosk-api",
+    "tags": [
+      "offline-asr",
+      "vosk",
+      "speech-recognition",
+      "edge",
+      "lightweight",
+      "multilingual"
+    ],
+    "use_cases": [
+      "offline voice commands",
+      "embedded speech recognition",
+      "IoT ASR",
+      "lightweight local transcription"
+    ],
+    "url_status": "valid",
+    "stars": 14420,
+    "github_url": "https://github.com/alphacep/vosk-api",
+    "last_updated": "2026-03-23T01:13:20Z",
+    "id": 54,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "api"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "tencent/Hunyuan3D-2",
+    "name": "Hunyuan3D",
+    "category": "Multimodal AI",
+    "function": "3D Generation Model",
+    "description": "Text-to-3D and Image-to-3D Generation",
+    "developer": "tencent",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 3,240 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/tencent/Hunyuan3D-2",
+    "tags": [
+      "3d-generation",
+      "multimodal",
+      "tencent",
+      "image-to-3d",
+      "text-to-3d"
+    ],
+    "use_cases": [
+      "generate 3D assets from images",
+      "3D content creation",
+      "game asset generation",
+      "product visualization"
+    ],
+    "url_status": "valid",
+    "stars": 3240,
+    "github_url": "https://github.com/Tencent-Hunyuan/Hunyuan3D-2",
+    "last_updated": "",
+    "id": 55,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "895453957",
+    "name": "HunyuanVideo",
+    "category": "Multimodal AI",
+    "function": "Text-to-Video Generation Model",
+    "description": "HunyuanVideo: A Systematic Framework For Large Video Generation Model",
+    "developer": "Tencent-Hunyuan",
+    "version": "latest",
+    "cost": "See Repository",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 11,862 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://aivideo.hunyuan.tencent.com",
+    "tags": [
+      "video-generation",
+      "text-to-video",
+      "multimodal",
+      "diffusion",
+      "tencent"
+    ],
+    "use_cases": [
+      "generate video from text",
+      "video content creation",
+      "AI filmmaking",
+      "video prototype generation"
+    ],
+    "url_status": "valid",
+    "stars": 11862,
+    "github_url": "https://github.com/Tencent-Hunyuan/HunyuanVideo",
+    "last_updated": "2026-03-23T02:17:24Z",
+    "id": 56,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "153097643",
+    "name": "OpenVINO",
+    "category": "Model Serving / Inference",
+    "function": "Intel Model Inference Toolkit",
+    "description": "OpenVINO™ is an open source toolkit for optimizing and deploying AI inference",
+    "developer": "openvinotoolkit",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "C++",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 9,928 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://docs.openvino.ai",
+    "tags": [
+      "model-inference",
+      "intel",
+      "edge-ai",
+      "optimization",
+      "openvino",
+      "onnx"
+    ],
+    "use_cases": [
+      "optimize models for Intel hardware",
+      "edge model deployment",
+      "computer vision inference",
+      "accelerate LLM inference on CPU"
+    ],
+    "url_status": "valid",
+    "stars": 9928,
+    "github_url": "https://github.com/openvinotoolkit/openvino",
+    "last_updated": "2026-03-23T01:20:04Z",
+    "id": 57,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "891705470",
+    "name": "LTX Video",
+    "category": "Multimodal AI",
+    "function": "Real-Time Video Generation Model",
+    "description": "Official repository for LTX-Video",
+    "developer": "Lightricks",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 9,682 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://ltx.io/model",
+    "tags": [
+      "video-generation",
+      "diffusion",
+      "real-time",
+      "ltx",
+      "generative-ai"
+    ],
+    "use_cases": [
+      "generate video from text prompts",
+      "video-to-video transformation",
+      "video content creation",
+      "real-time video synthesis"
+    ],
+    "url_status": "valid",
+    "stars": 9682,
+    "github_url": "https://github.com/Lightricks/LTX-Video",
+    "last_updated": "2026-03-22T20:17:33Z",
+    "id": 58,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "203999962",
+    "name": "MMagic",
+    "category": "Computer Vision",
+    "function": "Generative Vision Toolkit",
+    "description": "OpenMMLab Multimodal Advanced, Generative, and Intelligent Creation Toolbox. Unlock the magic 🪄: Generative-AI (AIGC), easy-to-use APIs, awsome model zoo, diffusion models, for text-to-image generation, image/video restoration/enhancement, etc.",
+    "developer": "open-mmlab",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Jupyter Notebook"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 7,408 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://mmagic.readthedocs.io/en/latest/",
+    "tags": [
+      "image-generation",
+      "video-editing",
+      "super-resolution",
+      "inpainting",
+      "mmagic",
+      "openmmlab"
+    ],
+    "use_cases": [
+      "image inpainting",
+      "super-resolution",
+      "image generation",
+      "video restoration",
+      "visual content creation"
+    ],
+    "url_status": "valid",
+    "stars": 7408,
+    "github_url": "https://github.com/open-mmlab/mmagic",
+    "last_updated": "2026-03-22T06:21:53Z",
+    "id": 59,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "framework"
+  },
+  {
+    "source": "github",
+    "source_id": "653386433",
+    "name": "StyleTTS2",
+    "category": "Speech / Audio AI",
+    "function": "Zero-Shot TTS Model",
+    "description": "StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models",
+    "developer": "yl4579",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 6,222 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/yl4579/StyleTTS2",
+    "tags": [
+      "tts",
+      "text-to-speech",
+      "voice-cloning",
+      "zero-shot",
+      "styletts2"
+    ],
+    "use_cases": [
+      "zero-shot voice cloning",
+      "expressive TTS",
+      "custom voice synthesis",
+      "audiobook generation"
+    ],
+    "url_status": "valid",
+    "stars": 6222,
+    "github_url": "https://github.com/yl4579/StyleTTS2",
+    "last_updated": "2026-03-20T20:47:33Z",
+    "id": 60,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "210299376",
+    "name": "CTranslate2",
+    "category": "Model Serving / Inference",
+    "function": "Efficient Transformer Inference Engine",
+    "description": "Fast inference engine for Transformer models",
+    "developer": "OpenNMT",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "C++",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 4,370 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://opennmt.net/CTranslate2",
+    "tags": [
+      "inference",
+      "transformer",
+      "optimization",
+      "ctranslate2",
+      "quantization",
+      "cpu-gpu"
+    ],
+    "use_cases": [
+      "fast transformer inference",
+      "quantized model deployment",
+      "NLP model serving",
+      "efficient translation systems"
+    ],
+    "url_status": "valid",
+    "stars": 4370,
+    "github_url": "https://github.com/OpenNMT/CTranslate2",
+    "last_updated": "2026-03-22T20:31:23Z",
+    "id": 61,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "github",
+    "source_id": "145103892",
+    "name": "FLOP Counter for PyTorch",
+    "category": "Developer Tools",
+    "function": "Model Complexity Profiler",
+    "description": "Flops counter for neural networks in pytorch framework",
+    "developer": "sovrasov",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 2,977 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/sovrasov/flops-counter.pytorch",
+    "tags": [
+      "profiling",
+      "flops",
+      "model-analysis",
+      "pytorch",
+      "complexity",
+      "benchmarking"
+    ],
+    "use_cases": [
+      "measure model computational cost",
+      "compare model efficiency",
+      "benchmark neural architectures",
+      "optimize model size"
+    ],
+    "url_status": "valid",
+    "stars": 2977,
+    "github_url": "https://github.com/sovrasov/flops-counter.pytorch",
+    "last_updated": "2026-03-19T11:41:10Z",
+    "id": 62,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "developer-tool"
+  },
+  {
+    "source": "github",
+    "source_id": "200340627",
+    "name": "Graph Transformer",
+    "category": "Fine-Tuning / Training",
+    "function": "Graph Neural Network Library",
+    "description": "Universal Graph Transformer Self-Attention Networks (TheWebConf WWW 2022) (Pytorch and Tensorflow)",
+    "developer": "daiquocnguyen",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 680 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/daiquocnguyen/Graph-Transformer",
+    "tags": [
+      "graph-neural-networks",
+      "gnn",
+      "transformer",
+      "graph-ml",
+      "attention"
+    ],
+    "use_cases": [
+      "graph-based ML",
+      "molecular property prediction",
+      "social network analysis",
+      "knowledge graph embedding"
+    ],
+    "url_status": "valid",
+    "stars": 680,
+    "github_url": "https://github.com/daiquocnguyen/Graph-Transformer",
+    "last_updated": "2026-03-18T06:12:25Z",
+    "id": 63,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "343344143",
+    "name": "TranAD",
+    "category": "MLOps / LLMOps",
+    "function": "Time Series Anomaly Detection",
+    "description": "[VLDB'22] Anomaly Detection using Transformers, self-conditioning and adversarial training.",
+    "developer": "imperial-qore",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 672 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/imperial-qore/TranAD",
+    "tags": [
+      "anomaly-detection",
+      "time-series",
+      "transformer",
+      "monitoring",
+      "tranad"
+    ],
+    "use_cases": [
+      "detect anomalies in sensor data",
+      "model monitoring",
+      "IT infrastructure anomaly detection",
+      "predictive maintenance"
+    ],
+    "url_status": "valid",
+    "stars": 672,
+    "github_url": "https://github.com/imperial-qore/TranAD",
+    "last_updated": "2026-03-20T05:22:58Z",
+    "id": 64,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "github",
+    "source_id": "657442586",
+    "name": "Metal Flash Attention",
+    "category": "Developer Tools",
+    "function": "Apple GPU Attention Optimization",
+    "description": "FlashAttention (Metal Port)",
+    "developer": "philipturner",
+    "version": "latest",
+    "cost": "Free / Open Source",
+    "compatibility": [
+      "Swift"
+    ],
+    "dependencies": [],
+    "social_impact": "Starred by 593 developers on GitHub.",
+    "example_code": "",
+    "official_url": "https://github.com/philipturner/metal-flash-attention",
+    "tags": [
+      "attention",
+      "apple-silicon",
+      "metal",
+      "gpu-optimization",
+      "flash-attention",
+      "performance"
+    ],
+    "use_cases": [
+      "optimize LLM inference on Apple Silicon",
+      "faster transformer attention",
+      "reduce GPU memory for attention",
+      "Mac-optimized AI workloads"
+    ],
+    "url_status": "valid",
+    "stars": 593,
+    "github_url": "https://github.com/philipturner/metal-flash-attention",
+    "last_updated": "2026-03-18T04:06:54Z",
+    "id": 65,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "developer-tool"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "black-forest-labs/FLUX.1-dev",
+    "name": "FLUX.1 Dev",
+    "category": "LLM / Generative AI",
+    "function": "Image Generation Diffusion Model",
+    "description": "Flux.1 Dev — an interactive Machine Learning application on HuggingFace.",
+    "developer": "black-forest-labs",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 9,409 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/black-forest-labs/FLUX.1-dev",
+    "tags": [
+      "image-generation",
+      "flux",
+      "diffusion",
+      "text-to-image",
+      "black-forest-labs"
+    ],
+    "use_cases": [
+      "text-to-image generation",
+      "AI art creation",
+      "product image generation",
+      "design prototyping"
+    ],
+    "url_status": "valid",
+    "stars": 9409,
+    "last_updated": "",
+    "id": 66,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "dalle-mini/dalle-mini",
+    "name": "DALL-E Mini (Craiyon)",
+    "category": "LLM / Generative AI",
+    "function": "Text-to-Image Model",
+    "description": "Dalle Mini — an interactive Machine Learning application on HuggingFace.",
+    "developer": "dalle-mini",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 5,669 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/dalle-mini/dalle-mini",
+    "tags": [
+      "image-generation",
+      "dall-e",
+      "text-to-image",
+      "diffusion",
+      "multimodal"
+    ],
+    "use_cases": [
+      "generate images from text",
+      "AI art prototyping",
+      "concept visualization",
+      "image idea exploration"
+    ],
+    "url_status": "valid",
+    "stars": 5669,
+    "last_updated": "",
+    "id": 67,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "facebook/MusicGen",
+    "name": "MusicGen",
+    "category": "Speech / Audio AI",
+    "function": "Music Generation Model",
+    "description": "Musicgen — an interactive Machine Learning application on HuggingFace.",
+    "developer": "facebook",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 5,068 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/facebook/MusicGen",
+    "tags": [
+      "music-generation",
+      "audio-generation",
+      "meta",
+      "text-to-music",
+      "generative-audio"
+    ],
+    "use_cases": [
+      "generate music from text prompts",
+      "background music creation",
+      "audio content generation",
+      "music prototyping"
+    ],
+    "url_status": "valid",
+    "stars": 5068,
+    "last_updated": "",
+    "id": 68,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "black-forest-labs/FLUX.1-schnell",
+    "name": "FLUX.1 Schnell",
+    "category": "LLM / Generative AI",
+    "function": "Fast Image Generation Model",
+    "description": "Flux.1 Schnell — an interactive Machine Learning application on HuggingFace.",
+    "developer": "black-forest-labs",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 5,050 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/black-forest-labs/FLUX.1-schnell",
+    "tags": [
+      "image-generation",
+      "flux",
+      "fast-inference",
+      "text-to-image",
+      "distilled"
+    ],
+    "use_cases": [
+      "fast text-to-image generation",
+      "real-time image creation",
+      "low-latency design prototyping",
+      "high-throughput image generation"
+    ],
+    "url_status": "valid",
+    "stars": 5050,
+    "last_updated": "",
+    "id": 69,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "Wan-AI/Wan2.2-Animate",
+    "name": "Wan2.2",
+    "category": "Multimodal AI",
+    "function": "Video Generation Model",
+    "description": "Wan2.2 Animate",
+    "developer": "Wan-AI",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 5,016 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/Wan-AI/Wan2.2-Animate",
+    "tags": [
+      "video-generation",
+      "wan",
+      "multimodal",
+      "diffusion",
+      "text-to-video"
+    ],
+    "use_cases": [
+      "generate animated videos",
+      "text-to-video synthesis",
+      "video content creation",
+      "AI video production"
+    ],
+    "url_status": "valid",
+    "stars": 5016,
+    "last_updated": "",
+    "id": 70,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "microsoft/TRELLIS",
+    "name": "TRELLIS",
+    "category": "Multimodal AI",
+    "function": "3D Asset Generation Model",
+    "description": "Scalable and Versatile 3D Generation from images",
+    "developer": "microsoft",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 4,776 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/microsoft/TRELLIS",
+    "tags": [
+      "3d-generation",
+      "image-to-3d",
+      "microsoft",
+      "structured-latent",
+      "multimodal"
+    ],
+    "use_cases": [
+      "generate 3D models from images",
+      "game asset creation",
+      "3D scene generation",
+      "product 3D visualization"
+    ],
+    "url_status": "valid",
+    "stars": 4776,
+    "last_updated": "",
+    "id": 71,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "KingNish/OpenGPT-4o",
+    "name": "OpenGPT-4o",
+    "category": "LLM / Generative AI",
+    "function": "Open Multimodal LLM",
+    "description": "GPT 4o like bot.",
+    "developer": "KingNish",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 4,312 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/KingNish/OpenGPT-4o",
+    "tags": [
+      "multimodal",
+      "llm",
+      "vision-language",
+      "gpt-4o",
+      "open-source"
+    ],
+    "use_cases": [
+      "vision-language tasks",
+      "image understanding",
+      "open-source GPT-4o alternative",
+      "multimodal chatbots"
+    ],
+    "url_status": "valid",
+    "stars": 4312,
+    "last_updated": "",
+    "id": 72,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "KlingTeam/LivePortrait",
+    "name": "LivePortrait",
+    "category": "Computer Vision",
+    "function": "Portrait Animation Model",
+    "description": "Apply the motion of a video on a portrait",
+    "developer": "KlingTeam",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 3,726 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/KlingTeam/LivePortrait",
+    "tags": [
+      "portrait-animation",
+      "face",
+      "video-synthesis",
+      "real-time",
+      "stitching-retargeting"
+    ],
+    "use_cases": [
+      "animate portrait images",
+      "avatar creation",
+      "face reenactment",
+      "video content creation"
+    ],
+    "url_status": "valid",
+    "stars": 3726,
+    "last_updated": "",
+    "id": 73,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "InstantX/InstantID",
+    "name": "InstantID",
+    "category": "Computer Vision",
+    "function": "Identity-Preserving Image Generation",
+    "description": "Instantid — an interactive Machine Learning application on HuggingFace.",
+    "developer": "InstantX",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 3,578 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/InstantX/InstantID",
+    "tags": [
+      "face",
+      "identity-preserving",
+      "diffusion",
+      "controlnet",
+      "personalized-generation"
+    ],
+    "use_cases": [
+      "personalized avatar generation",
+      "identity-consistent image creation",
+      "face-swapping in diffusion",
+      "digital twin creation"
+    ],
+    "url_status": "valid",
+    "stars": 3578,
+    "last_updated": "",
+    "id": 74,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "hexgrad/Kokoro-TTS",
+    "name": "Kokoro TTS",
+    "category": "Speech / Audio AI",
+    "function": "Lightweight Open-Weight TTS",
+    "description": "Upgraded to v1.0!",
+    "developer": "hexgrad",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 3,236 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/hexgrad/Kokoro-TTS",
+    "tags": [
+      "tts",
+      "text-to-speech",
+      "kokoro",
+      "lightweight",
+      "open-weight",
+      "voice-synthesis"
+    ],
+    "use_cases": [
+      "low-latency TTS",
+      "local voice synthesis",
+      "chatbot voice output",
+      "audiobook generation"
+    ],
+    "url_status": "valid",
+    "stars": 3236,
+    "last_updated": "",
+    "id": 75,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "pharmapsychotic/CLIP-Interrogator",
+    "name": "CLIP Interrogator",
+    "category": "Computer Vision",
+    "function": "Image-to-Prompt Vision Tool",
+    "description": "Clip Interrogator — an interactive Machine Learning application on HuggingFace.",
+    "developer": "pharmapsychotic",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,968 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/pharmapsychotic/CLIP-Interrogator",
+    "tags": [
+      "clip",
+      "image-to-text",
+      "vision",
+      "prompt-engineering",
+      "image-analysis"
+    ],
+    "use_cases": [
+      "generate prompts from images",
+      "understand what CLIP sees",
+      "reverse-engineer image prompts",
+      "image captioning"
+    ],
+    "url_status": "valid",
+    "stars": 2968,
+    "last_updated": "",
+    "id": 76,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "developer-tool"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "mrfakename/E2-F5-TTS",
+    "name": "E2/F5 TTS",
+    "category": "Speech / Audio AI",
+    "function": "Efficient Flow-Matching TTS",
+    "description": "F5-TTS & E2-TTS: Zero-Shot Voice Cloning (Unofficial Demo)",
+    "developer": "mrfakename",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,823 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/mrfakename/E2-F5-TTS",
+    "tags": [
+      "tts",
+      "text-to-speech",
+      "flow-matching",
+      "voice-cloning",
+      "e2-tts",
+      "f5-tts"
+    ],
+    "use_cases": [
+      "zero-shot voice cloning",
+      "efficient TTS synthesis",
+      "custom voice generation",
+      "multilingual TTS"
+    ],
+    "url_status": "valid",
+    "stars": 2823,
+    "last_updated": "",
+    "id": 77,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "sanchit-gandhi/whisper-jax",
+    "name": "Whisper JAX",
+    "category": "Speech / Audio AI",
+    "function": "JAX-Accelerated Whisper",
+    "description": "Whisper Jax — an interactive Machine Learning application on HuggingFace.",
+    "developer": "sanchit-gandhi",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,804 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/sanchit-gandhi/whisper-jax",
+    "tags": [
+      "whisper",
+      "jax",
+      "tpu",
+      "fast-inference",
+      "asr",
+      "transcription"
+    ],
+    "use_cases": [
+      "TPU-accelerated transcription",
+      "fast batch ASR",
+      "large-scale audio processing",
+      "GPU-optimized Whisper"
+    ],
+    "url_status": "valid",
+    "stars": 2804,
+    "last_updated": "",
+    "id": 78,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "coqui/xtts",
+    "name": "XTTS",
+    "category": "Speech / Audio AI",
+    "function": "Voice Cloning TTS Model",
+    "description": "Xtts — an interactive Machine Learning application on HuggingFace.",
+    "developer": "coqui",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,769 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/coqui/xtts",
+    "tags": [
+      "tts",
+      "voice-cloning",
+      "xtts",
+      "coqui",
+      "multilingual",
+      "zero-shot"
+    ],
+    "use_cases": [
+      "zero-shot voice cloning",
+      "multilingual voice synthesis",
+      "custom voice generation",
+      "podcast production"
+    ],
+    "url_status": "valid",
+    "stars": 2769,
+    "last_updated": "",
+    "id": 79,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "suno/bark",
+    "name": "Bark",
+    "category": "Speech / Audio AI",
+    "function": "Text-to-Audio Generation Model",
+    "description": "Bark — an interactive Machine Learning application on HuggingFace.",
+    "developer": "suno",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,371 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/suno/bark",
+    "tags": [
+      "text-to-audio",
+      "bark",
+      "suno",
+      "music",
+      "speech",
+      "sound-effects"
+    ],
+    "use_cases": [
+      "generate speech with emotion",
+      "create audio from text",
+      "generate music and sound effects",
+      "AI voice acting"
+    ],
+    "url_status": "valid",
+    "stars": 2371,
+    "last_updated": "",
+    "id": 80,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "sczhou/CodeFormer",
+    "name": "CodeFormer",
+    "category": "Computer Vision",
+    "function": "Face Restoration Model",
+    "description": "Codeformer — an interactive Machine Learning application on HuggingFace.",
+    "developer": "sczhou",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,345 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/sczhou/CodeFormer",
+    "tags": [
+      "face-restoration",
+      "image-enhancement",
+      "blind-restoration",
+      "codeformer",
+      "super-resolution"
+    ],
+    "use_cases": [
+      "restore degraded face images",
+      "enhance old photos",
+      "face super-resolution",
+      "video face restoration"
+    ],
+    "url_status": "valid",
+    "stars": 2345,
+    "last_updated": "",
+    "id": 81,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "model-runtime"
+  },
+  {
+    "source": "huggingface",
+    "source_id": "microsoft/HuggingGPT",
+    "name": "HuggingGPT",
+    "category": "AI Agents",
+    "function": "LLM Task Planning Agent",
+    "description": "Hugginggpt — an interactive Machine Learning application on HuggingFace.",
+    "developer": "microsoft",
+    "version": "latest",
+    "cost": "Free",
+    "compatibility": [
+      "Web Browser",
+      "Python"
+    ],
+    "dependencies": [],
+    "social_impact": "Liked by 2,270 users on HuggingFace Spaces.",
+    "example_code": "",
+    "official_url": "https://huggingface.co/spaces/microsoft/HuggingGPT",
+    "tags": [
+      "agents",
+      "task-planning",
+      "llm",
+      "huggingface",
+      "multi-model",
+      "orchestration"
+    ],
+    "use_cases": [
+      "orchestrate multiple AI models via LLM",
+      "complex multi-step AI tasks",
+      "LLM-as-controller agents",
+      "multimodal task automation"
+    ],
+    "url_status": "valid",
+    "stars": 2270,
+    "last_updated": "",
+    "id": 82,
+    "last_crawled": "2026-03-23T02:20:24.217721+00:00",
+    "stale_count": 0,
+    "scope": "in_scope_primary",
+    "type": "agent-framework"
+  },
+  {
+    "name": "Lindy",
+    "category": "AI Developer Platforms",
+    "function": "AI Workflow Automation Platform",
+    "description": "An AI agent platform that lets you build custom agents to automate complex multi-step workflows across your apps without writing code.",
+    "developer": "Lindy AI",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Helps teams automate repetitive workflows, saving hours of manual work each week.",
+    "example_code": "",
+    "official_url": "https://www.lindy.ai",
+    "tags": [
+      "ai-agents",
+      "workflow",
+      "automation",
+      "no-code",
+      "saas"
+    ],
+    "use_cases": [
+      "automate business workflows with AI",
+      "build AI assistants without code",
+      "connect AI to apps",
+      "AI-powered task automation"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 83,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Perplexity AI",
+    "category": "LLM / Generative AI",
+    "function": "AI Search API",
+    "description": "An AI search engine that provides real-time, fact-checked answers with cited sources, combining web search with large language model reasoning.",
+    "developer": "Perplexity AI",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "Web Browser",
+      "iOS",
+      "Android"
+    ],
+    "dependencies": [],
+    "social_impact": "Makes research faster and more reliable by surfacing accurate answers with source citations.",
+    "example_code": "",
+    "official_url": "https://www.perplexity.ai",
+    "tags": [
+      "search",
+      "llm",
+      "rag",
+      "api",
+      "perplexity",
+      "real-time-search"
+    ],
+    "use_cases": [
+      "real-time AI search",
+      "grounded question answering",
+      "build search-augmented apps",
+      "web-aware chatbots"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 84,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Jasper AI",
+    "category": "LLM / Generative AI",
+    "function": "AI Content Generation Platform",
+    "description": "An AI writing platform designed for marketing teams to create on-brand content at scale, including blog posts, ads, emails, and social media copy.",
+    "developer": "Jasper AI",
+    "version": "latest",
+    "cost": "Paid",
+    "compatibility": [
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Enables marketing teams to produce consistent branded content faster without scaling headcount.",
+    "example_code": "",
+    "official_url": "https://www.jasper.ai",
+    "tags": [
+      "content-generation",
+      "llm",
+      "copywriting",
+      "saas",
+      "marketing-ai"
+    ],
+    "use_cases": [
+      "AI copywriting",
+      "marketing content generation",
+      "brand-consistent writing",
+      "content workflow automation"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 85,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Copy.ai",
+    "category": "LLM / Generative AI",
+    "function": "AI Writing Assistant Platform",
+    "description": "An AI-powered copywriting tool that helps marketers and teams generate product messaging, sales copy, and marketing content quickly.",
+    "developer": "Copy.ai",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Reduces time spent on writing repetitive marketing copy, freeing teams for higher-level strategy.",
+    "example_code": "",
+    "official_url": "https://www.copy.ai",
+    "tags": [
+      "copywriting",
+      "llm",
+      "writing",
+      "saas",
+      "content-generation"
+    ],
+    "use_cases": [
+      "automated copywriting",
+      "sales email generation",
+      "product descriptions",
+      "marketing content at scale"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 86,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Grammarly",
+    "category": "NLP",
+    "function": "AI Writing Enhancement API",
+    "description": "An AI-powered writing assistant that provides real-time grammar, spelling, style, and tone suggestions across browsers, documents, and apps.",
+    "developer": "Grammarly Inc.",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "Web Browser",
+      "macOS",
+      "Windows",
+      "iOS",
+      "Android"
+    ],
+    "dependencies": [],
+    "social_impact": "Used by millions to improve communication clarity in professional and academic settings.",
+    "example_code": "",
+    "official_url": "https://www.grammarly.com",
+    "tags": [
+      "grammar",
+      "nlp",
+      "writing",
+      "saas",
+      "api",
+      "text-correction"
+    ],
+    "use_cases": [
+      "grammar correction API",
+      "writing quality improvement",
+      "tone detection",
+      "plagiarism checking"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 87,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "ChatGPT",
+    "category": "LLM / Generative AI",
+    "function": "Conversational AI Platform",
+    "description": "A general-purpose conversational AI by OpenAI capable of brainstorming, writing, coding, math, analysis, and reasoning across virtually any topic.",
+    "developer": "OpenAI",
+    "version": "GPT-4o",
+    "cost": "Freemium",
+    "compatibility": [
+      "Web Browser",
+      "iOS",
+      "Android"
+    ],
+    "dependencies": [],
+    "social_impact": "One of the most widely used AI tools globally, adopted across education, business, and software development.",
+    "example_code": "",
+    "official_url": "https://chat.openai.com",
+    "tags": [
+      "chatgpt",
+      "llm",
+      "openai",
+      "conversational-ai",
+      "saas"
+    ],
+    "use_cases": [
+      "conversational AI interface",
+      "rapid AI prototyping",
+      "content generation",
+      "code explanation"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 88,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Cursor",
+    "category": "Developer Tools",
+    "function": "AI Code Editor",
+    "description": "An AI-first code editor built on VS Code that lets developers write, edit, and debug code using natural language, with deep codebase understanding.",
+    "developer": "Anysphere",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "macOS",
+      "Windows",
+      "Linux"
+    ],
+    "dependencies": [],
+    "social_impact": "Significantly speeds up software development by letting developers describe changes in plain English.",
+    "example_code": "",
+    "official_url": "https://www.cursor.com",
+    "tags": [
+      "ai-coding",
+      "ide",
+      "code-generation",
+      "llm",
+      "developer-tool"
+    ],
+    "use_cases": [
+      "AI-assisted coding",
+      "code generation",
+      "refactoring with AI",
+      "codebase Q&A"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 89,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Synthesia",
+    "category": "Multimodal AI",
+    "function": "AI Video Generation Platform",
+    "description": "An AI video platform that turns text scripts into professional videos featuring AI avatars, eliminating the need for cameras, studios, or actors.",
+    "developer": "Synthesia",
+    "version": "latest",
+    "cost": "Paid",
+    "compatibility": [
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Makes professional video production accessible to teams without video production budgets.",
+    "example_code": "",
+    "official_url": "https://www.synthesia.io",
+    "tags": [
+      "video-generation",
+      "avatar",
+      "text-to-video",
+      "saas",
+      "api"
+    ],
+    "use_cases": [
+      "create AI avatar videos",
+      "training video production",
+      "multilingual video localization",
+      "marketing video automation"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 90,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "PlayAI",
+    "category": "Speech / Audio AI",
+    "function": "Voice AI Platform",
+    "description": "An AI voice platform for generating lifelike voiceovers in multiple languages and accents, used for content creation, accessibility, and app integration.",
+    "developer": "PlayAI",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "Web Browser",
+      "API"
+    ],
+    "dependencies": [],
+    "social_impact": "Improves content accessibility and enables creators to produce multilingual audio at low cost.",
+    "example_code": "",
+    "official_url": "https://play.ai",
+    "tags": [
+      "tts",
+      "voice-cloning",
+      "api",
+      "voice-ai",
+      "saas"
+    ],
+    "use_cases": [
+      "voice cloning API",
+      "text-to-speech for apps",
+      "AI voice agents",
+      "audiobook production"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 91,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Descript",
+    "category": "Speech / Audio AI",
+    "function": "AI Audio/Video Editing Platform",
+    "description": "A media editing tool that lets you edit audio and video by editing the transcript text, with AI features like filler word removal and voice cloning.",
+    "developer": "Descript",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "macOS",
+      "Windows"
+    ],
+    "dependencies": [],
+    "social_impact": "Lowers the barrier for podcast and video creators by making editing as simple as editing a document.",
+    "example_code": "",
+    "official_url": "https://www.descript.com",
+    "tags": [
+      "audio-editing",
+      "transcription",
+      "overdub",
+      "voice-cloning",
+      "video-editing"
+    ],
+    "use_cases": [
+      "AI-powered audio editing",
+      "transcript-based editing",
+      "voice overdub",
+      "podcast production"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 92,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Vapi AI",
+    "category": "Speech / Audio AI",
+    "function": "Voice AI Agent API",
+    "description": "A developer platform for building and deploying real-time AI voice agents that can handle phone calls, customer support, and voice-based workflows.",
+    "developer": "Vapi AI",
+    "version": "latest",
+    "cost": "Freemium",
+    "compatibility": [
+      "API",
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Enables businesses to automate phone-based customer interactions without hiring large call centre teams.",
+    "example_code": "",
+    "official_url": "https://vapi.ai",
+    "tags": [
+      "voice-ai",
+      "api",
+      "real-time",
+      "voice-agents",
+      "telephony",
+      "tts-asr"
+    ],
+    "use_cases": [
+      "build voice AI agents",
+      "phone call AI",
+      "real-time voice bots",
+      "customer service voice AI"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 93,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "name": "Obviously AI",
+    "category": "MLOps / LLMOps",
+    "function": "No-Code ML Platform",
+    "description": "A no-code machine learning platform that lets business users run predictions on their data without writing any code, using AutoML under the hood.",
+    "developer": "Obviously AI",
+    "version": "latest",
+    "cost": "Paid",
+    "compatibility": [
+      "Web Browser"
+    ],
+    "dependencies": [],
+    "social_impact": "Democratises machine learning by letting non-technical teams build predictive models from spreadsheet data.",
+    "example_code": "",
+    "official_url": "https://www.obviously.ai",
+    "tags": [
+      "no-code-ml",
+      "automl",
+      "prediction",
+      "saas",
+      "csv-to-model"
+    ],
+    "use_cases": [
+      "AutoML for non-engineers",
+      "predict outcomes from CSV data",
+      "no-code model deployment",
+      "business ML automation"
+    ],
+    "url_status": "valid",
+    "source": "manual",
+    "id": 94,
+    "scope": "in_scope_secondary",
+    "type": "saas-integrated"
+  },
+  {
+    "id": 95,
+    "name": "OpenCV",
+    "category": "Computer Vision",
+    "function": "Computer Vision Library",
+    "description": "Open Source Computer Vision Library — the most widely used library for real-time image and video processing. Covers object detection, face recognition, optical flow, camera calibration, and hundreds of other vision algorithms used in production software.",
+    "developer": "OpenCV Team (Intel origin)",
+    "version": "4.9.0",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "C++",
+      "Java",
+      "Linux",
+      "Windows",
+      "macOS",
+      "Android",
+      "iOS"
+    ],
+    "dependencies": [
+      "NumPy",
+      "CMake"
+    ],
+    "social_impact": "Powers autonomous vehicles, medical imaging diagnostics, and surveillance systems. Widely used in accessibility tools like real-time sign language recognition. Also raises privacy concerns around facial recognition and mass surveillance.",
+    "example_code": "import cv2\n\n# Load image and detect edges\nimg = cv2.imread('photo.jpg', cv2.IMREAD_GRAYSCALE)\nedges = cv2.Canny(img, threshold1=100, threshold2=200)\n\n# Real-time face detection\nface_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')\ncap = cv2.VideoCapture(0)\nwhile True:\n    ret, frame = cap.read()\n    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)\n    faces = face_cascade.detectMultiScale(gray, 1.1, 4)\n    for (x, y, w, h) in faces:\n        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)\n    cv2.imshow('Face Detect', frame)\n    if cv2.waitKey(1) & 0xFF == ord('q'):\n        break\ncap.release()",
+    "official_url": "https://opencv.org",
+    "tags": [
+      "computer-vision",
+      "image-processing",
+      "object-detection",
+      "face-detection",
+      "real-time",
+      "video"
+    ],
+    "use_cases": [
+      "real-time object detection",
+      "face recognition",
+      "image preprocessing",
+      "camera calibration",
+      "video analysis"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 96,
+    "name": "OpenAI API",
+    "category": "LLM / Generative AI",
+    "function": "Embedded LLM Platform",
+    "description": "OpenAI REST API providing access to GPT-4, GPT-4o, and other frontier models. Enables software engineers to embed large language model capabilities — text generation, function calling, vision, and embeddings — directly into applications with a few lines of code.",
+    "developer": "OpenAI",
+    "version": "GPT-4o (2024-11-20)",
+    "cost": "Paid (usage-based, ~$2.50/1M input tokens for GPT-4o)",
+    "compatibility": [
+      "Python",
+      "JavaScript",
+      "REST API",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "openai (Python SDK)",
+      "requests"
+    ],
+    "social_impact": "Democratizes access to powerful AI for small teams and individuals. Raises concerns around job displacement, misinformation generation, and over-reliance on proprietary infrastructure. OpenAI publishes usage policies to restrict harmful applications.",
+    "example_code": "from openai import OpenAI\n\nclient = OpenAI(api_key='YOUR_API_KEY')\n\n# Basic chat completion\nresponse = client.chat.completions.create(\n    model='gpt-4o',\n    messages=[\n        {'role': 'system', 'content': 'You are a helpful software assistant.'},\n        {'role': 'user', 'content': 'Explain what a REST API is in 2 sentences.'}\n    ]\n)\nprint(response.choices[0].message.content)\n\n# With function calling\ntools = [{\n    'type': 'function',\n    'function': {\n        'name': 'get_weather',\n        'description': 'Get current weather for a city',\n        'parameters': {'type': 'object', 'properties': {'city': {'type': 'string'}}}\n    }\n}]\nresponse = client.chat.completions.create(model='gpt-4o', messages=[{'role':'user','content':'Weather in Toronto?'}], tools=tools)",
+    "official_url": "https://platform.openai.com",
+    "tags": [
+      "llm",
+      "gpt-4",
+      "openai",
+      "function-calling",
+      "embeddings",
+      "vision",
+      "chatbot"
+    ],
+    "use_cases": [
+      "build AI chatbots",
+      "code generation",
+      "document summarization",
+      "semantic embeddings",
+      "function calling agents"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "api"
+  },
+  {
+    "id": 97,
+    "name": "LangChain",
+    "category": "AI Agents",
+    "function": "LLM Orchestration Framework",
+    "description": "Framework for building applications powered by language models. Provides composable components for chaining LLM calls, connecting to external data sources, building RAG pipelines, and creating autonomous AI agents that can use tools and memory.",
+    "developer": "LangChain Inc.",
+    "version": "0.3.x",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "JavaScript/TypeScript",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "langchain-core",
+      "langchain-community",
+      "openai or anthropic SDK",
+      "faiss-cpu or chromadb"
+    ],
+    "social_impact": "Lowers the barrier for building AI-powered products, enabling smaller teams to ship LLM features quickly. Raises questions about transparency when AI agents autonomously execute multi-step tasks. Encourages responsible design through built-in memory and guardrail patterns.",
+    "example_code": "from langchain_openai import ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\nfrom langchain_community.vectorstores import FAISS\nfrom langchain_openai import OpenAIEmbeddings\nfrom langchain.chains import RetrievalQA\n\n# Simple chain\nllm = ChatOpenAI(model='gpt-4o')\nprompt = ChatPromptTemplate.from_messages([\n    ('system', 'Answer concisely.'),\n    ('human', '{question}')\n])\nchain = prompt | llm\nresult = chain.invoke({'question': 'What is gradient descent?'})\nprint(result.content)\n\n# RAG pipeline\ndocs = ['FastAPI is a modern Python web framework.', 'It supports async and OpenAPI docs.']\nvectorstore = FAISS.from_texts(docs, OpenAIEmbeddings())\nqa = RetrievalQA.from_chain_type(llm=llm, retriever=vectorstore.as_retriever())\nprint(qa.invoke('What is FastAPI?'))",
+    "official_url": "https://www.langchain.com",
+    "tags": [
+      "llm",
+      "rag",
+      "agents",
+      "prompt-chaining",
+      "orchestration",
+      "langchain"
+    ],
+    "use_cases": [
+      "build RAG pipelines",
+      "create LLM-powered agents",
+      "document Q&A",
+      "multi-step reasoning",
+      "chatbot development"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "agent-framework"
+  },
+  {
+    "id": 98,
+    "name": "Whisper",
+    "category": "Speech / Audio AI",
+    "function": "Automatic Speech Recognition System",
+    "description": "OpenAI Whisper is a general-purpose automatic speech recognition model trained on 680,000 hours of multilingual audio. It performs transcription, translation, and language identification with near-human accuracy across 99 languages, making it the go-to open-source ASR tool for production use.",
+    "developer": "OpenAI",
+    "version": "large-v3",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS",
+      "CUDA GPU (optional)"
+    ],
+    "dependencies": [
+      "torch",
+      "ffmpeg",
+      "numpy",
+      "tqdm"
+    ],
+    "social_impact": "Dramatically improves accessibility by enabling accurate transcription for people with hearing impairments. Supports low-resource languages that commercial providers ignore. Can be misused for mass audio surveillance; OpenAI releases model weights to allow community auditing.",
+    "example_code": "import whisper\n\n# Load model (tiny, base, small, medium, large-v3)\nmodel = whisper.load_model('base')\n\n# Transcribe audio file\nresult = model.transcribe('meeting_recording.mp3')\nprint(result['text'])\n\n# Transcribe with language detection\nresult = model.transcribe('audio.mp3', task='transcribe')\nprint(f\"Detected language: {result['language']}\")\nprint(f\"Transcript: {result['text']}\")\n\n# Translate non-English audio to English\nresult = model.transcribe('spanish_audio.mp3', task='translate')\nprint(result['text'])",
+    "official_url": "https://github.com/openai/whisper",
+    "tags": [
+      "speech-to-text",
+      "transcription",
+      "multilingual",
+      "audio",
+      "asr",
+      "whisper"
+    ],
+    "use_cases": [
+      "meeting transcription",
+      "subtitle generation",
+      "voice commands",
+      "multilingual audio processing",
+      "podcast indexing"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 99,
+    "name": "Ultralytics YOLO",
+    "category": "Computer Vision",
+    "function": "Object Detection Framework",
+    "description": "YOLO (You Only Look Once) by Ultralytics is the industry-standard real-time object detection framework. YOLOv11 detects, segments, classifies, and tracks objects in images and video in a single neural network pass, enabling real-time performance on edge devices and production servers alike.",
+    "developer": "Ultralytics",
+    "version": "YOLOv11",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS",
+      "CUDA GPU",
+      "Raspberry Pi",
+      "NVIDIA Jetson"
+    ],
+    "dependencies": [
+      "torch",
+      "torchvision",
+      "opencv-python",
+      "numpy",
+      "Pillow"
+    ],
+    "social_impact": "Enables affordable computer vision for agriculture (crop monitoring), healthcare (tumor detection), and safety (PPE compliance). Widely deployed in surveillance systems, raising significant privacy and civil liberties concerns. Open weights allow independent bias auditing.",
+    "example_code": "from ultralytics import YOLO\n\n# Load pretrained model\nmodel = YOLO('yolo11n.pt')  # nano (fastest) or yolo11x.pt (most accurate)\n\n# Detect objects in an image\nresults = model('street.jpg')\nresults[0].show()  # display with bounding boxes\n\n# Real-time webcam detection\nresults = model(source=0, show=True, conf=0.5)  # source=0 = webcam\n\n# Run on video and save\nresults = model('traffic.mp4', save=True)\n\n# Access predictions programmatically\nfor r in results:\n    for box in r.boxes:\n        print(f'Class: {r.names[int(box.cls)]} | Confidence: {box.conf.item():.2f}')",
+    "official_url": "https://ultralytics.com",
+    "tags": [
+      "object-detection",
+      "yolo",
+      "real-time",
+      "segmentation",
+      "tracking",
+      "edge-ai"
+    ],
+    "use_cases": [
+      "real-time object detection",
+      "video surveillance",
+      "autonomous vehicles",
+      "industrial inspection",
+      "sports analytics"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "library"
+  },
+  {
+    "id": 100,
+    "name": "LlamaIndex",
+    "category": "AI Agents",
+    "function": "Question Answering / RAG Framework",
+    "description": "LlamaIndex (formerly GPT Index) is a data framework for connecting LLMs to external data sources. It specializes in building Retrieval-Augmented Generation (RAG) pipelines that allow LLMs to answer questions over private documents, databases, and APIs without retraining the model.",
+    "developer": "LlamaIndex Inc.",
+    "version": "0.12.x",
+    "cost": "Free",
+    "compatibility": [
+      "Python",
+      "Linux",
+      "Windows",
+      "macOS"
+    ],
+    "dependencies": [
+      "llama-index-core",
+      "openai or anthropic SDK",
+      "chromadb or pinecone",
+      "pypdf"
+    ],
+    "social_impact": "Enables organizations to build private Q&A systems over internal documents without sending data to cloud models. Reduces hallucination by grounding answers in retrieved facts. Makes enterprise AI more accessible to product teams without ML backgrounds.",
+    "example_code": "from llama_index.core import VectorStoreIndex, SimpleDirectoryReader\nfrom llama_index.llms.openai import OpenAI\n\n# Load documents from a folder\ndocuments = SimpleDirectoryReader('docs/').load_data()\n\n# Build vector index\nindex = VectorStoreIndex.from_documents(documents)\n\n# Create Q&A engine\nquery_engine = index.as_query_engine(\n    llm=OpenAI(model='gpt-4o'),\n    similarity_top_k=3\n)\n\n# Ask questions over your documents\nresponse = query_engine.query('What are the system requirements?')\nprint(response)\n\n# Chat with memory\nchat_engine = index.as_chat_engine(chat_mode='condense_plus_context')\nreply = chat_engine.chat('Summarize the installation steps')\nprint(reply)",
+    "official_url": "https://www.llamaindex.ai",
+    "tags": [
+      "rag",
+      "retrieval",
+      "indexing",
+      "llm-apps",
+      "document-qa",
+      "llamaindex"
+    ],
+    "use_cases": [
+      "document Q&A systems",
+      "enterprise knowledge base",
+      "RAG pipeline",
+      "semantic search",
+      "research assistants"
+    ],
+    "url_status": "valid",
+    "scope": "in_scope_primary",
+    "type": "agent-framework"
+  }
+]
