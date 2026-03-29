@@ -1,5 +1,12 @@
 fastapi
-uvicorn
-pydantic
+uvicorn[standard]
+pydantic[email]
 requests
 apscheduler
+sqlalchemy
+python-jose[cryptography]
+bcrypt
+python-multipart
+httpx
+python-dotenv
+psycopg2-binary

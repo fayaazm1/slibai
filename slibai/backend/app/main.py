@@ -1,22 +1,31 @@
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
+load_dotenv()  # loads backend/.env when running locally
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from app.database import engine, Base
+import app.models.user  # noqa: F401 — ensure model is registered before create_all
 from app.routes.tools import router as tools_router
 from app.routes.admin import router as admin_router
+from app.routes.auth import router as auth_router
+from app.routes.admin_users import router as admin_users_router
 from app.crawler.runner import run_crawl
 
 
-# ── Scheduler ──────────────────────────────────────────────────────────────────
+# runs the crawler every 24 hours in the background
 
 _scheduler = BackgroundScheduler(timezone="UTC")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Run a crawl every 24 hours.  first_run=True fires one immediately at startup.
+    # make sure all tables exist before we start taking requests
+    Base.metadata.create_all(bind=engine)
+
     _scheduler.add_job(
         run_crawl,
         trigger="interval",
@@ -31,7 +40,7 @@ async def lifespan(app: FastAPI):
     print("[Scheduler] Shut down.")
 
 
-# ── App ────────────────────────────────────────────────────────────────────────
+# app setup
 
 app = FastAPI(
     title="SLIBAI Backend",
@@ -48,8 +57,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(tools_router)
 app.include_router(admin_router)
+app.include_router(admin_users_router)
 
 
 @app.get("/")
