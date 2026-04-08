@@ -7,6 +7,18 @@ venv/
 *.egg-info/
 .python-version
 
+# Desktop build output (large binaries — don't commit these)
+backend/downloads/*.dmg
+backend/downloads/*.exe
+backend/downloads/*.AppImage
+backend/downloads/*.blockmap
+backend/downloads/*.yaml
+backend/downloads/mac/
+backend/downloads/mac-arm64/
+backend/downloads/win-unpacked/
+backend/downloads/linux-unpacked/
+desktop/node_modules/
+
 # Data backups / temp files
 backend/app/data/ai_tools_backup.json
 backend/app/data/*.tmp
