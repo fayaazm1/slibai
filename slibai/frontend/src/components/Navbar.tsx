@@ -11,38 +11,32 @@ export default function Navbar() {
   const navigate = useNavigate()
 
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
+  const [mobileOpen, setMobileOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
-  // close user dropdown when clicking outside
+  // close desktop dropdown when clicking outside
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
+    function onClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
   }, [])
 
   // close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [pathname])
+  useEffect(() => { setMobileOpen(false) }, [pathname])
 
-  // lock body scroll when mobile menu is open
+  // prevent background scroll while mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [mobileMenuOpen])
+  }, [mobileOpen])
 
-  const links = [
+  const navLinks = [
     { to: '/', label: 'Browse' },
-    {
-      to: '/compare',
-      label: compareList.length > 0 ? `Compare (${compareList.length})` : 'Compare',
-    },
+    { to: '/compare', label: compareList.length > 0 ? `Compare (${compareList.length})` : 'Compare' },
     { to: '/stats', label: 'Stats' },
     ...(user?.is_admin ? [{ to: '/admin', label: 'Admin' }] : []),
   ]
@@ -66,22 +60,12 @@ export default function Navbar() {
     },
   ]
 
-  function UserAvatar({ size = 'sm' }: { size?: 'sm' | 'md' }) {
-    const av = getAvatar(user?.avatar_url)
-    const cls = size === 'md' ? 'w-10 h-10 rounded-xl text-xl' : 'w-7 h-7 rounded-full text-sm'
-    return (
-      <div className={`${cls} ${av.bg} flex items-center justify-center shrink-0`}>
-        {av.id === 'default'
-          ? <span className="text-white font-bold" style={{ fontSize: size === 'md' ? 16 : 11 }}>
-              {(user?.name ?? user?.email ?? '?').charAt(0).toUpperCase()}
-            </span>
-          : av.emoji}
-      </div>
-    )
-  }
+  const av = getAvatar(user?.avatar_url)
+  const avatarInitial = (user?.name ?? user?.email ?? '?').charAt(0).toUpperCase()
 
   return (
     <>
+      {/* ── Top bar ── */}
       <nav className="sticky top-0 z-40 bg-slate-900 border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 flex items-center h-14 gap-2">
 
@@ -90,9 +74,9 @@ export default function Navbar() {
             <span className="text-indigo-400">SLIB</span>ai
           </Link>
 
-          {/* Desktop nav links — hidden on mobile */}
+          {/* Desktop nav links */}
           <div className="hidden md:flex gap-1">
-            {links.map(link => (
+            {navLinks.map(link => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -107,17 +91,20 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right side */}
           <div className="ml-auto flex items-center gap-2">
 
-            {/* Desktop user menu */}
+            {/* Desktop: user avatar dropdown */}
             {user ? (
               <div className="relative hidden md:block" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(o => !o)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
                 >
-                  <UserAvatar />
+                  <div className={`w-7 h-7 rounded-full ${av.bg} flex items-center justify-center shrink-0`}>
+                    {av.id === 'default'
+                      ? <span className="text-white text-xs font-bold">{avatarInitial}</span>
+                      : <span className="text-sm">{av.emoji}</span>}
+                  </div>
                   <span className="text-slate-300 text-sm hidden lg:block max-w-[120px] truncate">
                     {user.name ?? user.email}
                   </span>
@@ -127,9 +114,13 @@ export default function Navbar() {
                 </button>
 
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                  <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50">
                     <div className="px-4 py-3 border-b border-slate-700 flex items-center gap-3">
-                      <UserAvatar size="md" />
+                      <div className={`w-9 h-9 rounded-xl ${av.bg} flex items-center justify-center shrink-0`}>
+                        {av.id === 'default'
+                          ? <span className="text-white text-sm font-bold">{avatarInitial}</span>
+                          : <span className="text-lg">{av.emoji}</span>}
+                      </div>
                       <div className="min-w-0">
                         <p className="text-white text-sm font-semibold truncate">{user.name ?? 'User'}</p>
                         <p className="text-slate-400 text-xs truncate">{user.email}</p>
@@ -163,7 +154,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Link to="/signin" className="text-slate-400 hover:text-white text-sm font-medium transition-colors">
+                <Link to="/signin" className="text-slate-400 hover:text-white text-sm font-medium transition-colors px-3 py-1.5">
                   Sign In
                 </Link>
                 <Link to="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
@@ -172,36 +163,41 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Mobile hamburger button */}
+            {/* Mobile: hamburger button */}
             <button
-              onClick={() => setMobileMenuOpen(o => !o)}
-              className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-slate-800 transition-colors gap-1.5"
-              aria-label="Toggle menu"
+              onClick={() => setMobileOpen(o => !o)}
+              className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-lg hover:bg-slate-800 transition-colors"
+              aria-label="Menu"
             >
-              <span className={`block w-5 h-0.5 bg-slate-300 transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-              <span className={`block w-5 h-0.5 bg-slate-300 transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block w-5 h-0.5 bg-slate-300 transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+              <span className={`w-5 h-0.5 bg-slate-300 rounded transition-all duration-200 origin-center ${mobileOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+              <span className={`w-5 h-0.5 bg-slate-300 rounded transition-all duration-200 ${mobileOpen ? 'opacity-0 scale-x-0' : ''}`} />
+              <span className={`w-5 h-0.5 bg-slate-300 rounded transition-all duration-200 origin-center ${mobileOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile menu overlay + drawer */}
-      {mobileMenuOpen && (
-        <>
-          {/* backdrop */}
+      {/* ── Mobile menu ── */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-30 md:hidden" onClick={() => setMobileOpen(false)}>
+          {/* dim backdrop */}
+          <div className="absolute inset-0 bg-black/60" />
+
+          {/* menu panel — stop clicks propagating so menu stays open when tapping inside */}
           <div
-            className="fixed inset-0 z-30 bg-black/60 md:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
+            className="absolute top-14 left-0 right-0 bg-slate-900 border-b border-slate-700 shadow-2xl overflow-y-auto"
+            style={{ maxHeight: 'calc(100vh - 56px)' }}
+            onClick={e => e.stopPropagation()}
+          >
 
-          {/* drawer */}
-          <div className="fixed top-14 left-0 right-0 z-40 md:hidden bg-slate-900 border-b border-slate-700 shadow-2xl max-h-[calc(100vh-56px)] overflow-y-auto">
-
-            {/* user info at top (if logged in) */}
+            {/* logged-in user header */}
             {user && (
-              <div className="px-4 py-4 border-b border-slate-800 flex items-center gap-3">
-                <UserAvatar size="md" />
+              <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-800">
+                <div className={`w-10 h-10 rounded-xl ${av.bg} flex items-center justify-center shrink-0`}>
+                  {av.id === 'default'
+                    ? <span className="text-white font-bold text-base">{avatarInitial}</span>
+                    : <span className="text-xl">{av.emoji}</span>}
+                </div>
                 <div className="min-w-0">
                   <p className="text-white text-sm font-semibold truncate">{user.name ?? 'User'}</p>
                   <p className="text-slate-500 text-xs truncate">{user.email}</p>
@@ -209,37 +205,34 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* main nav links */}
-            <div className="px-3 py-3 border-b border-slate-800">
-              <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider px-2 mb-2">Navigation</p>
-              {links.map(link => (
+            {/* nav links */}
+            <div className="px-3 pt-3 pb-2 border-b border-slate-800">
+              <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider px-2 mb-2">Menu</p>
+              {navLinks.map(link => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-colors mb-1 ${
+                  className={`flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium mb-1 transition-colors ${
                     pathname === link.to
                       ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
                       : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
                   {link.label}
-                  {pathname === link.to && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                  )}
+                  {pathname === link.to && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
                 </Link>
               ))}
             </div>
 
-            {/* profile links (if logged in) */}
+            {/* account links or sign-in buttons */}
             {user ? (
               <>
-                <div className="px-3 py-3 border-b border-slate-800">
+                <div className="px-3 pt-3 pb-2 border-b border-slate-800">
                   <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider px-2 mb-2">Account</p>
                   {profileLinks.map(item => (
                     <button
                       key={item.tab}
-                      onClick={() => { navigate(`/profile?tab=${item.tab}`); setMobileMenuOpen(false) }}
+                      onClick={() => { navigate(`/profile?tab=${item.tab}`); setMobileOpen(false) }}
                       className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors mb-1"
                     >
                       <span className="text-slate-500">{item.icon}</span>
@@ -249,7 +242,7 @@ export default function Navbar() {
                 </div>
                 <div className="px-3 py-3">
                   <button
-                    onClick={() => { logout(); setMobileMenuOpen(false) }}
+                    onClick={() => { logout(); setMobileOpen(false) }}
                     className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -263,14 +256,12 @@ export default function Navbar() {
               <div className="px-3 py-4 flex flex-col gap-2">
                 <Link
                   to="/signin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 border border-slate-700 transition-colors"
+                  className="w-full text-center py-3 rounded-xl text-sm font-medium text-slate-300 border border-slate-700 hover:bg-slate-800 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/signup"
-                  onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center py-3 rounded-xl text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
                 >
                   Sign Up
@@ -278,7 +269,7 @@ export default function Navbar() {
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </>
   )

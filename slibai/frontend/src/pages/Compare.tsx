@@ -154,15 +154,17 @@ export default function Compare() {
         {compareList.some(t => t.example_code) && (
           <div>
             <h2 className="text-white font-semibold text-lg mb-4">Code Examples</h2>
-            <div
-              className="grid gap-4"
-              style={{ gridTemplateColumns: `repeat(${Math.max(compareList.length, 1)}, 1fr)` }}
-            >
+            {/* stack on mobile, side-by-side on larger screens */}
+            <div className={`grid gap-4 grid-cols-1 ${
+              compareList.length === 2 ? 'lg:grid-cols-2' :
+              compareList.length === 3 ? 'lg:grid-cols-3' :
+              compareList.length >= 4 ? 'lg:grid-cols-2 xl:grid-cols-4' : ''
+            }`}>
               {compareList.map(tool => (
-                <div key={tool.id}>
-                  <p className="text-slate-300 text-sm font-medium mb-2">{tool.name}</p>
+                <div key={tool.id} className="min-w-0">
+                  <p className="text-slate-300 text-sm font-medium mb-2 truncate">{tool.name}</p>
                   {tool.example_code ? (
-                    <pre className="bg-slate-950 border border-slate-700 rounded-xl p-4 text-xs text-slate-300 overflow-auto h-52">
+                    <pre className="bg-slate-950 border border-slate-700 rounded-xl p-4 text-xs text-slate-300 overflow-x-auto overflow-y-auto h-52 w-full whitespace-pre">
                       <code>{tool.example_code}</code>
                     </pre>
                   ) : (
