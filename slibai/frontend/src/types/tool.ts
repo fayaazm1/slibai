@@ -18,3 +18,10 @@ export interface CategoryStat {
   category: string
   count: number
 }
+
+export interface SearchResponse {
+  results: AITool[]
+  detected_category: string | null
+  total_results: number
+  query: string
+}

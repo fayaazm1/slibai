@@ -45,6 +45,29 @@ export default function Compare() {
     )
   }
 
+  if (compareList.length === 1) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-white text-xl font-semibold mb-2">Only 1 tool selected</h2>
+          <p className="text-slate-400 text-sm mb-2 max-w-xs mx-auto">
+            Please select at least 2 tools to compare.
+          </p>
+          <p className="text-slate-500 text-xs mb-6">
+            Currently selected: <span className="text-slate-300">{compareList[0].name}</span>
+          </p>
+          <Link
+            to="/"
+            className="inline-block bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-500 transition-colors"
+          >
+            Add More Tools
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 pb-8">
       <div className="max-w-7xl mx-auto px-4 py-6">

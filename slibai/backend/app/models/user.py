@@ -11,6 +11,7 @@ class User(Base):
     hashed_password = Column(String, nullable=True)   # null for OAuth-only users
     provider = Column(String, default="local")         # "local" | "google" | "github"
     provider_id = Column(String, nullable=True)        # OAuth subject ID
+    avatar_url = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     reset_token = Column(String, nullable=True)

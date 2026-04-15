@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { AITool } from '../types/tool'
 import { useCompare } from '../context/CompareContext'
+import { useAuth } from '../context/AuthContext'
+import ReportIssueModal from './ReportIssueModal'
 
 function costColor(cost?: string) {
   if (!cost) return 'text-slate-400'
@@ -13,13 +15,17 @@ function costColor(cost?: string) {
 interface Props {
   tool: AITool | null
   onClose: () => void
+  onOpen?: (tool: AITool) => void
 }
 
-export default function ToolDetailModal({ tool, onClose }: Props) {
+export default function ToolDetailModal({ tool, onClose, onOpen }: Props) {
   const { addTool, removeTool, isInCompare, compareList } = useCompare()
+  const { user } = useAuth()
+  const [showReport, setShowReport] = useState(false)
 
   useEffect(() => {
     if (!tool) return
+    onOpen?.(tool)
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
@@ -91,6 +97,17 @@ export default function ToolDetailModal({ tool, onClose }: Props) {
                 </svg>
               </a>
             )}
+            {user && (
+              <button
+                onClick={() => setShowReport(true)}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-700 text-slate-400 hover:bg-red-900/40 hover:text-red-400 transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                Report Issue
+              </button>
+            )}
           </div>
 
           {/* full description — no line clamp here unlike the card */}
@@ -141,6 +158,9 @@ export default function ToolDetailModal({ tool, onClose }: Props) {
           )}
         </div>
       </div>
+      {showReport && (
+        <ReportIssueModal tool={tool} onClose={() => setShowReport(false)} />
+      )}
     </>
   )
 }

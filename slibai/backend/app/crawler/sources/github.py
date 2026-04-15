@@ -39,7 +39,6 @@ TOPICS = [
 ]
 
 # Any repo whose name or description contains one of these words gets skipped.
-# This is how we avoid pulling in courses, guides, awesome lists, etc.
 _EXCLUDE_KEYWORDS = {
     "tutorial", "tutorials", "course", "courses", "beginner", "beginners",
     "awesome", "guide", "guides", "roadmap", "learn", "learning", "book",
@@ -47,7 +46,19 @@ _EXCLUDE_KEYWORDS = {
     "lecture", "lectures", "workshop", "examples", "demo", "demos",
     "leaderboard", "benchmark", "benchmarks", "survey", "paper", "papers",
     "collection", "list", "lists", "resources", "resource", "curated",
-    "from-scratch", "scratch", "interview", "interview-prep",
+    "from-scratch", "scratch", "interview", "interview-prep", "homework",
+    "assignment", "exercise", "exercises", "practice", "cheatsheet",
+}
+
+# Keywords that confirm a repo IS an AI tool/library (name or description must match)
+_AI_KEYWORDS = {
+    "ai", "ml", "llm", "nlp", "gpt", "bert", "transformer", "neural",
+    "deep learning", "machine learning", "artificial intelligence",
+    "computer vision", "speech", "language model", "inference", "embedding",
+    "diffusion", "generative", "classification", "detection", "segmentation",
+    "reinforcement", "rag", "vector", "training", "fine-tun", "pytorch",
+    "tensorflow", "keras", "model", "agent", "chatbot", "ocr", "gpu",
+    "cuda", "onnx", "hugging", "openai", "anthropic",
 }
 
 # Maps GitHub topics to our AI-focused category taxonomy
@@ -87,7 +98,6 @@ _TOPIC_TO_CATEGORY = {
     "rag": "AI Agents",
 }
 
-# What the tool actually does — shown in the UI as the subtitle
 _TOPIC_TO_FUNCTION = {
     "llm": "Large Language Model",
     "large-language-model": "Large Language Model",
@@ -107,7 +117,6 @@ _TOPIC_TO_FUNCTION = {
     "object-detection": "Object Detection Library",
 }
 
-# Developer-focused use cases per topic
 _TOPIC_TO_USE_CASES = {
     "llm": ["build LLM-powered apps", "chatbot development", "code generation", "text summarization"],
     "natural-language-processing": ["text classification", "named entity recognition", "NLP pipelines"],
@@ -176,16 +185,39 @@ def _infer_cost(license_info: dict | None) -> str:
 
 
 def _is_junk(repo: dict) -> bool:
-    # Check the repo name and description for words that indicate it's
-    # a course, guide, awesome list, or demo — not a usable developer tool.
+    """True if the repo looks like a tutorial, guide, demo, or collection — not a tool."""
     name = repo.get("name", "").lower().replace("-", " ").replace("_", " ")
     desc = (repo.get("description") or "").lower()
     combined = name + " " + desc
-    return any(kw in combined.split() for kw in _EXCLUDE_KEYWORDS)
+    tokens = combined.split()
+    return any(kw in tokens for kw in _EXCLUDE_KEYWORDS)
+
+
+def _is_ai_relevant(repo: dict) -> bool:
+    """
+    Secondary check: confirm the repo is actually AI-related by looking for
+    AI keywords in the name, description, or topics. Repos that land in AI
+    topic searches but aren't AI tools (e.g. generic CLI tooling, web frameworks
+    that happen to be starred a lot) get dropped here.
+    """
+    name = repo.get("name", "").lower()
+    desc = (repo.get("description") or "").lower()
+    topics = " ".join(repo.get("topics", []))
+    combined = f"{name} {desc} {topics}"
+    return any(kw in combined for kw in _AI_KEYWORDS)
+
+
+def _validate_tool(tool: dict) -> bool:
+    """Ensure the tool has the minimum fields needed to be useful in the UI."""
+    return bool(
+        tool.get("name")
+        and tool.get("category")
+        and tool.get("description")
+        and len(tool.get("description", "")) >= 20  # skip one-liners that add no value
+    )
 
 
 def _respect_rate_limit(headers: dict) -> None:
-    # back off if we're close to hitting GitHub's rate limit
     remaining = int(headers.get("X-RateLimit-Remaining", 10))
     if remaining < 5:
         reset_at = int(headers.get("X-RateLimit-Reset", time.time() + 60))
@@ -197,8 +229,6 @@ def _respect_rate_limit(headers: dict) -> None:
 
 
 def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
-    # track seen repo IDs so the same repo doesn't appear twice
-    # if it matches more than one of our topics
     seen_repo_ids: set = set()
     tools = []
     skipped = 0
@@ -221,17 +251,25 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
 
             for repo in items:
                 repo_id = str(repo["id"])
+
+                # De-duplicate across topics in this crawl run
                 if repo_id in seen_repo_ids:
                     continue
                 seen_repo_ids.add(repo_id)
 
-                # skip archived / disabled repos
+                # Skip archived / disabled repos
                 if repo.get("archived") or repo.get("disabled"):
                     skipped += 1
                     continue
 
-                # skip courses, tutorials, awesome lists, demos, etc.
+                # Skip courses, tutorials, awesome lists, demos
                 if _is_junk(repo):
+                    skipped += 1
+                    continue
+
+                # Must be genuinely AI-related — not a generic tool that
+                # happens to be tagged with an AI topic
+                if not _is_ai_relevant(repo):
                     skipped += 1
                     continue
 
@@ -262,6 +300,12 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
                     "github_url": repo["html_url"],
                     "last_updated": repo.get("updated_at", ""),
                 }
+
+                # Final validation — must have enough data to display properly
+                if not _validate_tool(tool):
+                    skipped += 1
+                    continue
+
                 tools.append(tool)
 
             _respect_rate_limit(resp.headers)
@@ -271,5 +315,5 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
         except Exception as e:
             print(f"[GitHub] Unexpected error on topic '{topic}': {e}")
 
-    print(f"[GitHub] Crawled {len(tools)} tools, skipped {skipped} junk/archived repos.")
+    print(f"[GitHub] Crawled {len(tools)} tools, skipped {skipped} junk/archived/non-AI repos.")
     return tools

@@ -1,0 +1,89 @@
+backend/run_crawler.py
+    F 19:0 main - A (2)
+backend/app/database.py
+    F 12:0 get_db - A (1)
+backend/app/main.py
+    F 25:0 lifespan - A (1)
+    F 67:0 root - A (1)
+backend/app/auth/email.py
+    F 19:0 send_reset_email - A (3)
+backend/app/auth/jwt_utils.py
+    F 16:0 verify_token - A (2)
+    F 10:0 create_access_token - A (1)
+backend/app/auth/password.py
+    F 4:0 hash_password - A (1)
+    F 8:0 verify_password - A (1)
+backend/app/auth/dependencies.py
+    F 12:0 get_current_user - A (4)
+    F 27:0 get_admin_user - A (2)
+backend/app/crawler/runner.py
+    F 38:0 run_crawl - A (5)
+    F 26:0 get_status - A (3)
+    F 88:0 run_crawl_in_background - A (1)
+backend/app/crawler/merger.py
+    F 48:0 merge - D (28)
+    F 23:0 _load - A (2)
+    F 30:0 _atomic_write - A (1)
+    F 39:0 _norm - A (1)
+    F 44:0 _norm_url - A (1)
+backend/app/crawler/sources/huggingface.py
+    F 107:0 crawl - C (14)
+    F 99:0 _infer_category - A (1)
+    F 103:0 _infer_use_cases - A (1)
+backend/app/crawler/sources/github.py
+    F 199:0 crawl - C (12)
+    F 162:0 _infer_cost - A (4)
+    F 141:0 _infer_category - A (3)
+    F 148:0 _infer_function - A (3)
+    F 155:0 _infer_use_cases - A (3)
+    F 178:0 _is_junk - A (3)
+    F 187:0 _respect_rate_limit - A (2)
+backend/app/models/user.py
+    C 5:0 User - A (1)
+backend/app/schemas/auth.py
+    C 6:0 SignUpRequest - A (1)
+    C 12:0 SignInRequest - A (1)
+    C 17:0 ForgotPasswordRequest - A (1)
+    C 21:0 ResetPasswordRequest - A (1)
+    C 26:0 UserResponse - A (1)
+    C 36:0 AdminUserResponse - A (1)
+    C 48:0 TokenResponse - A (1)
+backend/app/schemas/tool.py
+    C 5:0 AITool - A (1)
+backend/app/routes/auth.py
+    F 223:0 github_callback - B (10)
+    F 161:0 google_callback - A (5)
+    F 80:0 signin - A (4)
+    F 92:0 forgot_password - A (4)
+    F 121:0 reset_password - A (4)
+    F 56:0 signup - A (3)
+    F 147:0 google_login - A (2)
+    F 211:0 github_login - A (2)
+    F 48:0 _token_response - A (1)
+    F 140:0 me - A (1)
+backend/app/routes/admin_users.py
+    F 32:0 delete_user - A (3)
+    F 50:0 deactivate_user - A (3)
+    F 69:0 activate_user - A (2)
+    F 24:0 list_users - A (1)
+backend/app/routes/tools.py
+    F 24:0 read_compare_tools - A (5)
+    F 44:0 read_tool_by_id - A (2)
+    F 14:0 read_all_tools - A (1)
+    F 19:0 read_search_tools - A (1)
+    F 39:0 read_category_stats - A (1)
+backend/app/routes/admin.py
+    F 13:0 trigger_crawl - A (2)
+    F 27:0 crawl_status - A (1)
+backend/app/services/tool_service.py
+    F 44:0 search_tools - C (19)
+    F 18:0 get_tool_by_id - A (3)
+    F 26:0 _tool_full_text - A (3)
+    F 93:0 compare_tools - A (3)
+    F 98:0 get_category_stats - A (3)
+    F 9:0 load_tools - A (1)
+    F 14:0 get_all_tools - A (1)
+    F 40:0 _word_sim - A (1)
+
+67 blocks (classes, functions, methods) analyzed.
+Average complexity: A (3.1044776119402986)
