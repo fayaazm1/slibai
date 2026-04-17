@@ -24,15 +24,13 @@ from app.routes.codegen import router as codegen_router
 from app.crawler.runner import run_crawl
 
 
-# runs the crawler every 24 hours in the background
-
+# background scheduler — runs the crawler once a day to keep tool data fresh
 _scheduler = BackgroundScheduler(timezone="UTC")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # make sure all tables exist before we start taking requests
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)  # create any missing tables on startup
 
     _scheduler.add_job(
         run_crawl,
@@ -47,8 +45,6 @@ async def lifespan(app: FastAPI):
     _scheduler.shutdown(wait=False)
     print("[Scheduler] Shut down.")
 
-
-# app setup
 
 app = FastAPI(
     title="SLIBAI Backend",

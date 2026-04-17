@@ -1,7 +1,4 @@
-"""
-Admin crawler endpoints — trigger crawl and check status.
-Both endpoints require a valid JWT from an admin account.
-"""
+# Endpoints for triggering and checking the crawler — admin-only.
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from app.crawler.runner import run_crawl, get_status
@@ -16,7 +13,7 @@ def trigger_crawl(
     background_tasks: BackgroundTasks,
     _: User = Depends(get_admin_user),
 ):
-    """Trigger a crawl in the background. Returns immediately; poll /admin/crawl/status."""
+    """Kick off a background crawl. Returns right away — poll /admin/crawl/status to track progress."""
     status = get_status()
     if status.get("running"):
         return {"message": "A crawl is already running.", "status": status}
@@ -26,5 +23,5 @@ def trigger_crawl(
 
 @router.get("/crawl/status")
 def crawl_status(_: User = Depends(get_admin_user)):
-    """Return the current crawl state and last-run statistics."""
+    """Current crawl state plus stats from the last run."""
     return get_status()

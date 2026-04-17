@@ -109,7 +109,7 @@ Return ONLY a JSON object like this — no markdown fences:
 
 
 def _call_gemini(client: genai.Client, prompt: str, retries: int = 3) -> str:
-    """Call Gemini with exponential back-off on 503 errors."""
+    """Call Gemini and retry with exponential backoff if it throws a 503."""
     for attempt in range(1, retries + 1):
         try:
             logger.info("Gemini request — model=%s attempt=%d", MODEL, attempt)
@@ -141,7 +141,7 @@ def _call_gemini(client: genai.Client, prompt: str, retries: int = 3) -> str:
 
 
 def _parse_json(raw: str) -> dict:
-    """Strip accidental markdown fences and parse JSON."""
+    """Gemini sometimes wraps its response in markdown fences — strip those before parsing."""
     raw = re.sub(r"^```[a-z]*\n?", "", raw)
     raw = re.sub(r"\n?```$", "", raw)
     try:

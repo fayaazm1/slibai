@@ -104,7 +104,7 @@ def get_tool_by_id(tool_id: int):
 
 
 def _tool_signal_text(tool: dict) -> str:
-    """High-signal fields only: name, category, function, tags, use_cases."""
+    """The fields that actually matter for matching: name, category, function, tags, use_cases."""
     tags = " ".join(tool.get("tags", []) or [])
     use_cases = " ".join(tool.get("use_cases", []) or [])
     return " ".join([
@@ -135,8 +135,8 @@ def _word_sim(a: str, b: str) -> float:
 
 
 def detect_intent(query: str) -> str | None:
-    """Try to figure out which category the user is asking about.
-    Returns a category name like 'Computer Vision', or None if we can't tell."""
+    """Guess which category the user is asking about.
+    Returns something like 'Computer Vision', or None if we can't pin it down."""
     q = query.lower().strip()
 
     # check phrases before single words — "image recognition" is more specific than "image"
@@ -161,7 +161,7 @@ def detect_intent(query: str) -> str | None:
 
 
 def search_tools(query: str) -> dict:
-    """Main search — scores every tool against the query and returns ranked results."""
+    """Score every tool against the query and return them ranked best-first."""
     tools = load_tools()
     query_lower = query.lower().strip()
 
