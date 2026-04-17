@@ -1,9 +1,9 @@
 # Pulls AI/ML tool data from GitHub using their Search API.
-# We search by topic (e.g. "deep-learning", "llm") and only grab repos
-# with 500+ stars so we're not picking up random half-finished projects.
+# Only repos that are actual developer tools — libraries, frameworks, SDKs,
+# model runtimes, etc. Courses, tutorials, awesome lists and demo apps are
+# filtered out before anything hits the database.
 #
-# If you set a GITHUB_TOKEN environment variable, the rate limit goes from
-# 60 requests/hour up to 5000 — worth doing if you're running frequent crawls.
+# Set GITHUB_TOKEN in your environment to get 5000 req/hr instead of 60.
 
 import os
 import time
@@ -19,89 +19,122 @@ _HEADERS = {
 if GITHUB_TOKEN:
     _HEADERS["Authorization"] = f"Bearer {GITHUB_TOKEN}"
 
-# These are the topics we search on GitHub. Each one maps to a crawl request.
+# Topics focused on actual developer tools — not educational content
 TOPICS = [
-    "machine-learning",
-    "deep-learning",
+    "llm",
+    "large-language-model",
     "natural-language-processing",
     "computer-vision",
-    "generative-ai",
-    "llm",
-    "reinforcement-learning",
-    "mlops",
-    "audio-processing",
     "speech-recognition",
+    "text-to-speech",
+    "mlops",
+    "model-serving",
+    "vector-database",
+    "fine-tuning",
     "diffusion-models",
-    "transformer-models",
+    "ai-agents",
+    "rag",
+    "object-detection",
+    "deep-learning",
 ]
 
-# Maps GitHub repo topics to our app's category names.
-# We go through a repo's topics in order and return the first match.
+# Any repo whose name or description contains one of these words gets skipped.
+_EXCLUDE_KEYWORDS = {
+    "tutorial", "tutorials", "course", "courses", "beginner", "beginners",
+    "awesome", "guide", "guides", "roadmap", "learn", "learning", "book",
+    "handbook", "cheatsheet", "cheat-sheet", "playbook", "notes", "syllabus",
+    "lecture", "lectures", "workshop", "examples", "demo", "demos",
+    "leaderboard", "benchmark", "benchmarks", "survey", "paper", "papers",
+    "collection", "list", "lists", "resources", "resource", "curated",
+    "from-scratch", "scratch", "interview", "interview-prep", "homework",
+    "assignment", "exercise", "exercises", "practice", "cheatsheet",
+}
+
+# Keywords that confirm a repo IS an AI tool/library (name or description must match)
+_AI_KEYWORDS = {
+    "ai", "ml", "llm", "nlp", "gpt", "bert", "transformer", "neural",
+    "deep learning", "machine learning", "artificial intelligence",
+    "computer vision", "speech", "language model", "inference", "embedding",
+    "diffusion", "generative", "classification", "detection", "segmentation",
+    "reinforcement", "rag", "vector", "training", "fine-tun", "pytorch",
+    "tensorflow", "keras", "model", "agent", "chatbot", "ocr", "gpu",
+    "cuda", "onnx", "hugging", "openai", "anthropic",
+}
+
+# Maps GitHub topics to our AI-focused category taxonomy
 _TOPIC_TO_CATEGORY = {
-    "deep-learning": "Deep Learning",
-    "neural-networks": "Deep Learning",
-    "transformer-models": "Deep Learning",
-    "natural-language-processing": "Natural Language Processing (NLP)",
-    "nlp": "Natural Language Processing (NLP)",
-    "text-generation": "Natural Language Processing (NLP)",
-    "text-classification": "Natural Language Processing (NLP)",
-    "question-answering": "Natural Language Processing (NLP)",
+    "llm": "LLM / Generative AI",
+    "large-language-model": "LLM / Generative AI",
+    "generative-ai": "LLM / Generative AI",
+    "text-generation": "LLM / Generative AI",
+    "diffusion-models": "LLM / Generative AI",
+    "text-to-image": "LLM / Generative AI",
+    "natural-language-processing": "NLP",
+    "nlp": "NLP",
+    "text-classification": "NLP",
+    "question-answering": "NLP",
+    "named-entity-recognition": "NLP",
     "computer-vision": "Computer Vision",
     "image-classification": "Computer Vision",
     "object-detection": "Computer Vision",
     "image-segmentation": "Computer Vision",
-    "generative-ai": "Generative AI",
-    "llm": "Generative AI",
-    "large-language-model": "Generative AI",
-    "diffusion-models": "Generative AI",
-    "text-to-image": "Generative AI",
-    "reinforcement-learning": "Reinforcement Learning",
-    "machine-learning": "Machine Learning",
-    "scikit-learn": "Machine Learning",
-    "data-science": "Data Science",
-    "data-visualization": "Data Science",
-    "mlops": "MLOps",
-    "model-deployment": "MLOps",
-    "experiment-tracking": "MLOps",
-    "audio-processing": "Audio & Speech",
-    "speech-recognition": "Audio & Speech",
-    "text-to-speech": "Audio & Speech",
-    "automatic-speech-recognition": "Audio & Speech",
+    "speech-recognition": "Speech / Audio AI",
+    "automatic-speech-recognition": "Speech / Audio AI",
+    "text-to-speech": "Speech / Audio AI",
+    "audio-processing": "Speech / Audio AI",
+    "mlops": "MLOps / LLMOps",
+    "experiment-tracking": "MLOps / LLMOps",
+    "model-deployment": "Model Serving / Inference",
+    "model-serving": "Model Serving / Inference",
+    "inference": "Model Serving / Inference",
+    "vector-database": "Vector Databases",
+    "vector-search": "Vector Databases",
+    "embeddings": "Vector Databases",
+    "fine-tuning": "Fine-Tuning / Training",
+    "deep-learning": "Fine-Tuning / Training",
+    "neural-networks": "Fine-Tuning / Training",
+    "reinforcement-learning": "AI Agents",
+    "ai-agents": "AI Agents",
+    "rag": "AI Agents",
 }
 
-# Same idea but for the "function" field — what the tool actually does
 _TOPIC_TO_FUNCTION = {
-    "deep-learning": "Deep Learning Framework",
-    "natural-language-processing": "NLP Toolkit",
+    "llm": "Large Language Model",
+    "large-language-model": "Large Language Model",
+    "natural-language-processing": "NLP Library",
     "computer-vision": "Computer Vision Library",
     "generative-ai": "Generative AI Platform",
-    "llm": "Large Language Model",
-    "reinforcement-learning": "RL Framework",
-    "machine-learning": "Machine Learning Library",
-    "data-science": "Data Science Toolkit",
-    "mlops": "MLOps Platform",
-    "audio-processing": "Audio Processing Library",
-    "speech-recognition": "Speech Recognition System",
     "diffusion-models": "Diffusion Model Library",
+    "speech-recognition": "Speech Recognition Library",
+    "text-to-speech": "Text-to-Speech Library",
+    "mlops": "MLOps Tool",
+    "model-serving": "Model Serving Framework",
+    "vector-database": "Vector Database",
+    "fine-tuning": "Fine-Tuning Framework",
+    "deep-learning": "Deep Learning Framework",
+    "ai-agents": "AI Agent Framework",
+    "rag": "RAG Framework",
+    "object-detection": "Object Detection Library",
 }
 
-# Typical use cases per topic — used to fill in the use_cases field
 _TOPIC_TO_USE_CASES = {
-    "deep-learning": ["image classification", "model training", "neural network design"],
-    "natural-language-processing": ["text classification", "named entity recognition", "question answering"],
-    "computer-vision": ["image recognition", "object detection", "video analysis"],
-    "generative-ai": ["content generation", "image synthesis", "creative writing"],
-    "llm": ["chatbots", "code generation", "text summarization"],
-    "reinforcement-learning": ["game playing", "robotics control", "optimization"],
-    "speech-recognition": ["voice commands", "transcription", "language identification"],
-    "text-to-speech": ["accessibility tools", "virtual assistants", "content narration"],
-    "mlops": ["model deployment", "experiment tracking", "pipeline automation"],
-    "data-science": ["data analysis", "predictive modeling", "statistical analysis"],
-    "audio-processing": ["audio enhancement", "music generation", "sound classification"],
-    "diffusion-models": ["image generation", "video synthesis", "style transfer"],
+    "llm": ["build LLM-powered apps", "chatbot development", "code generation", "text summarization"],
+    "natural-language-processing": ["text classification", "named entity recognition", "NLP pipelines"],
+    "computer-vision": ["object detection", "image classification", "video analysis"],
+    "generative-ai": ["image generation", "content creation", "creative tools"],
+    "diffusion-models": ["text-to-image generation", "image editing", "style transfer"],
+    "speech-recognition": ["audio transcription", "voice commands", "meeting notes"],
+    "text-to-speech": ["voice synthesis", "accessibility tools", "audiobook generation"],
+    "mlops": ["experiment tracking", "model deployment", "ML pipeline automation"],
+    "model-serving": ["serve ML models as APIs", "scalable inference", "A/B model testing"],
+    "vector-database": ["semantic search", "RAG systems", "embedding storage"],
+    "fine-tuning": ["fine-tune LLMs", "custom model training", "domain adaptation"],
+    "deep-learning": ["neural network training", "transfer learning", "GPU model training"],
+    "ai-agents": ["autonomous agents", "tool-using LLMs", "multi-step task execution"],
+    "rag": ["document Q&A", "enterprise knowledge base", "retrieval-augmented generation"],
+    "object-detection": ["real-time detection", "video surveillance", "autonomous vehicles"],
 }
 
-# Maps the repo's primary language to what platforms it runs on
 _LANG_TO_COMPATIBILITY = {
     "Python": ["Python", "Linux", "Windows", "macOS"],
     "JavaScript": ["JavaScript", "Node.js", "Web Browser"],
@@ -118,7 +151,7 @@ def _infer_category(topics: list) -> str:
     for t in topics:
         if t in _TOPIC_TO_CATEGORY:
             return _TOPIC_TO_CATEGORY[t]
-    return "Machine Learning"
+    return "Fine-Tuning / Training"
 
 
 def _infer_function(topics: list) -> str:
@@ -151,9 +184,40 @@ def _infer_cost(license_info: dict | None) -> str:
     return "Check Repository"
 
 
+def _is_junk(repo: dict) -> bool:
+    """True if the repo looks like a tutorial, guide, demo, or collection — not a tool."""
+    name = repo.get("name", "").lower().replace("-", " ").replace("_", " ")
+    desc = (repo.get("description") or "").lower()
+    combined = name + " " + desc
+    tokens = combined.split()
+    return any(kw in tokens for kw in _EXCLUDE_KEYWORDS)
+
+
+def _is_ai_relevant(repo: dict) -> bool:
+    """
+    Secondary check: confirm the repo is actually AI-related by looking for
+    AI keywords in the name, description, or topics. Repos that land in AI
+    topic searches but aren't AI tools (e.g. generic CLI tooling, web frameworks
+    that happen to be starred a lot) get dropped here.
+    """
+    name = repo.get("name", "").lower()
+    desc = (repo.get("description") or "").lower()
+    topics = " ".join(repo.get("topics", []))
+    combined = f"{name} {desc} {topics}"
+    return any(kw in combined for kw in _AI_KEYWORDS)
+
+
+def _validate_tool(tool: dict) -> bool:
+    """Ensure the tool has the minimum fields needed to be useful in the UI."""
+    return bool(
+        tool.get("name")
+        and tool.get("category")
+        and tool.get("description")
+        and len(tool.get("description", "")) >= 20  # skip one-liners that add no value
+    )
+
+
 def _respect_rate_limit(headers: dict) -> None:
-    # GitHub tells us how many requests we have left in the response headers.
-    # If we're running low, we wait until the rate limit window resets.
     remaining = int(headers.get("X-RateLimit-Remaining", 10))
     if remaining < 5:
         reset_at = int(headers.get("X-RateLimit-Reset", time.time() + 60))
@@ -161,14 +225,13 @@ def _respect_rate_limit(headers: dict) -> None:
         print(f"[GitHub] Rate limit low ({remaining} left). Sleeping {sleep_for:.0f}s.")
         time.sleep(min(sleep_for, 120))
     else:
-        time.sleep(0.4)  # small pause between requests so we don't hammer the API
+        time.sleep(0.4)
 
 
 def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
-    # We keep track of repo IDs we've already seen so the same repo
-    # doesn't show up twice if it matches multiple topics.
     seen_repo_ids: set = set()
     tools = []
+    skipped = 0
 
     for topic in TOPICS:
         try:
@@ -188,15 +251,29 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
 
             for repo in items:
                 repo_id = str(repo["id"])
+
+                # De-duplicate across topics in this crawl run
                 if repo_id in seen_repo_ids:
                     continue
                 seen_repo_ids.add(repo_id)
 
-                # Skip repos that have been archived or disabled — no point showing dead tools
+                # Skip archived / disabled repos
                 if repo.get("archived") or repo.get("disabled"):
+                    skipped += 1
                     continue
 
-                topics = repo.get("topics", [])
+                # Skip courses, tutorials, awesome lists, demos
+                if _is_junk(repo):
+                    skipped += 1
+                    continue
+
+                # Must be genuinely AI-related — not a generic tool that
+                # happens to be tagged with an AI topic
+                if not _is_ai_relevant(repo):
+                    skipped += 1
+                    continue
+
+                topics_list = repo.get("topics", [])
                 lang = repo.get("language") or "Python"
                 raw_name = repo.get("name", "unknown")
                 display_name = raw_name.replace("-", " ").replace("_", " ").title()
@@ -205,9 +282,9 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
                     "source": "github",
                     "source_id": repo_id,
                     "name": display_name,
-                    "category": _infer_category(topics),
-                    "function": _infer_function(topics),
-                    "description": repo.get("description") or f"{display_name} — a {_infer_category(topics)} library.",
+                    "category": _infer_category(topics_list),
+                    "function": _infer_function(topics_list),
+                    "description": repo.get("description") or f"{display_name} — a {_infer_category(topics_list)} tool.",
                     "developer": repo.get("owner", {}).get("login", "Unknown"),
                     "version": "latest",
                     "cost": _infer_cost(repo.get("license")),
@@ -216,13 +293,19 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
                     "social_impact": f"Starred by {repo.get('stargazers_count', 0):,} developers on GitHub.",
                     "example_code": "",
                     "official_url": repo.get("homepage") or repo["html_url"],
-                    "tags": topics[:10],
-                    "use_cases": _infer_use_cases(topics),
+                    "tags": topics_list[:10],
+                    "use_cases": _infer_use_cases(topics_list),
                     "url_status": "valid",
                     "stars": repo.get("stargazers_count", 0),
                     "github_url": repo["html_url"],
                     "last_updated": repo.get("updated_at", ""),
                 }
+
+                # Final validation — must have enough data to display properly
+                if not _validate_tool(tool):
+                    skipped += 1
+                    continue
+
                 tools.append(tool)
 
             _respect_rate_limit(resp.headers)
@@ -232,5 +315,5 @@ def crawl(max_per_topic: int = 10, min_stars: int = 500) -> list:
         except Exception as e:
             print(f"[GitHub] Unexpected error on topic '{topic}': {e}")
 
-    print(f"[GitHub] Crawled {len(tools)} unique tools across {len(TOPICS)} topics.")
+    print(f"[GitHub] Crawled {len(tools)} tools, skipped {skipped} junk/archived/non-AI repos.")
     return tools

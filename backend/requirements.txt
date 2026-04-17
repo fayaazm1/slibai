@@ -10,3 +10,5 @@ python-multipart
 httpx
 python-dotenv
 psycopg2-binary
+google-generativeai
+google-genai

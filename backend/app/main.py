@@ -8,11 +8,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.database import engine, Base
-import app.models.user  # noqa: F401 — ensure model is registered before create_all
+import app.models.user      # noqa: F401
+import app.models.bookmark  # noqa: F401
+import app.models.activity  # noqa: F401
+import app.models.use_case  # noqa: F401
+import app.models.report    # noqa: F401
 from app.routes.tools import router as tools_router
 from app.routes.admin import router as admin_router
 from app.routes.auth import router as auth_router
 from app.routes.admin_users import router as admin_users_router
+from app.routes.user import router as user_router
+from app.routes.reports import router as reports_router
+from app.routes.admin_reports import router as admin_reports_router
+from app.routes.codegen import router as codegen_router
 from app.crawler.runner import run_crawl
 
 
@@ -61,6 +69,10 @@ app.include_router(auth_router)
 app.include_router(tools_router)
 app.include_router(admin_router)
 app.include_router(admin_users_router)
+app.include_router(user_router)
+app.include_router(reports_router)
+app.include_router(admin_reports_router)
+app.include_router(codegen_router)
 
 
 @app.get("/")

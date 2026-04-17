@@ -7,8 +7,10 @@ export interface User {
   id: number
   email: string
   name: string | null
+  avatar_url: string | null   // stores preset avatar id e.g. "robot", "fox"
   provider: string
   is_admin: boolean
+  created_at: string | null
 }
 
 export interface AuthResponse {

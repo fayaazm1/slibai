@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { getAllTools, searchTools } from '../api/tools'
+import { logActivity } from '../api/user'
+import { useAuth } from '../context/AuthContext'
 import type { AITool } from '../types/tool'
 import ToolCard from '../components/ToolCard'
 import ToolDetailModal from '../components/ToolDetailModal'
@@ -8,6 +10,7 @@ import CompareFloatBar from '../components/CompareFloatBar'
 const FEATURED_COUNT = 9
 
 export default function Home() {
+  const { token } = useAuth()
   const [tools, setTools] = useState<AITool[]>([])
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -16,6 +19,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchResults, setSearchResults] = useState<AITool[] | null>(null)
+  const [detectedCategory, setDetectedCategory] = useState<string | null>(null)
+  const [totalResults, setTotalResults] = useState<number | null>(null)
   const [searching, setSearching] = useState(false)
   const [showAll, setShowAll] = useState(false)
 
@@ -33,15 +38,20 @@ export default function Home() {
   }, [query])
 
   useEffect(() => {
-    if (!debouncedQuery) { setSearchResults(null); return }
+    if (!debouncedQuery) { setSearchResults(null); setDetectedCategory(null); setTotalResults(null); return }
     setSearching(true)
     searchTools(debouncedQuery)
-      .then(setSearchResults)
-      .catch(() => setSearchResults([]))
+      .then(res => {
+        // if something unexpected comes back, show empty rather than flooding the page with all tools
+        setSearchResults(res?.results ?? [])
+        setDetectedCategory(res?.detected_category ?? null)
+        setTotalResults(res?.total_results ?? 0)
+      })
+      .catch(() => { setSearchResults([]); setDetectedCategory(null); setTotalResults(0) })
       .finally(() => setSearching(false))
   }, [debouncedQuery])
 
-  // group categories: { category -> Set<function> }
+  // build a map of category → unique function types for the sidebar
   const categoryMap = useMemo(() => {
     const map = new Map<string, Set<string>>()
     for (const t of tools) {
@@ -54,10 +64,11 @@ export default function Home() {
   const isFiltered = !!debouncedQuery || !!selectedCategory
 
   const displayTools = useMemo(() => {
-    let list = searchResults ?? tools
-    if (selectedCategory) list = list.filter(t => t.category === selectedCategory)
+    // while a search is active, don't fall back to showing all tools — wait for real results
+    const list = debouncedQuery ? (searchResults ?? []) : tools
+    if (selectedCategory) return list.filter(t => t.category === selectedCategory)
     return list
-  }, [searchResults, tools, selectedCategory])
+  }, [searchResults, tools, selectedCategory, debouncedQuery])
 
   const visibleTools = isFiltered || showAll ? displayTools : displayTools.slice(0, FEATURED_COUNT)
 
@@ -71,6 +82,10 @@ export default function Home() {
   function clearFilters() {
     setSelectedCategory(null)
     setQuery('')
+    setDebouncedQuery('')       // skip the debounce delay, clear now
+    setSearchResults(null)      // wipe results so nothing stale shows up
+    setDetectedCategory(null)
+    setTotalResults(null)
     setShowAll(false)
   }
 
@@ -123,14 +138,39 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── Active filter pill ── */}
-        {selectedCategory && (
+        {/* ── Active filter pill (category browse) ── */}
+        {selectedCategory && !debouncedQuery && (
           <div className="flex items-center gap-2">
             <span className="text-zinc-400 text-sm">Filtering by:</span>
             <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs px-3 py-1 rounded-full flex items-center gap-1.5">
               {selectedCategory}
               <button onClick={clearFilters} className="hover:text-white transition-colors ml-1">×</button>
             </span>
+          </div>
+        )}
+
+        {/* ── Detected category banner (use-case search) ── */}
+        {debouncedQuery && (
+          <div className="flex items-center gap-3">
+            {detectedCategory ? (
+              <div className="flex items-center gap-2 bg-indigo-950/50 border border-indigo-500/30 rounded-lg px-4 py-2">
+                <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-zinc-400 text-xs">Showing results for:</span>
+                <span className="text-indigo-300 text-xs font-semibold">{detectedCategory}</span>
+                {totalResults !== null && (
+                  <span className="text-zinc-600 text-xs">· {totalResults} tools</span>
+                )}
+              </div>
+            ) : totalResults === 0 ? (
+              <div className="flex items-center gap-2 bg-amber-950/30 border border-amber-700/30 rounded-lg px-4 py-2">
+                <svg className="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-amber-400/80 text-xs">Try a more specific query — e.g. "image recognition", "build a chatbot", "speech transcription"</span>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -141,7 +181,9 @@ export default function Home() {
               {isFiltered
                 ? selectedCategory
                   ? selectedCategory
-                  : `Results for "${debouncedQuery}"`
+                  : detectedCategory
+                    ? detectedCategory
+                    : `Results for "${debouncedQuery}"`
                 : 'All agents'}
             </h2>
             {!isFiltered && !showAll && displayTools.length > FEATURED_COUNT && (
@@ -165,8 +207,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* Skeleton loaders */}
-          {loading && (
+          {/* skeleton while loading tools or waiting on search results */}
+          {(loading || searching) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: FEATURED_COUNT }).map((_, i) => (
                 <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 animate-pulse">
@@ -185,14 +227,14 @@ export default function Home() {
             </div>
           )}
 
-          {!loading && visibleTools.length === 0 && (
+          {!loading && !searching && visibleTools.length === 0 && (
             <div className="text-center py-20">
               <p className="text-zinc-500 text-base mb-1">No tools found</p>
               <p className="text-zinc-700 text-sm">Try a different search term or browse by category below</p>
             </div>
           )}
 
-          {!loading && visibleTools.length > 0 && (
+          {!loading && !searching && visibleTools.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {visibleTools.map(tool => (
                 <ToolCard key={tool.id} tool={tool} onSelect={setSelectedTool} />
@@ -248,7 +290,13 @@ export default function Home() {
         )}
       </div>
 
-      <ToolDetailModal tool={selectedTool} onClose={() => setSelectedTool(null)} />
+      <ToolDetailModal
+        tool={selectedTool}
+        onClose={() => setSelectedTool(null)}
+        onOpen={tool => {
+          if (token && tool) logActivity(token, { tool_id: tool.id, tool_name: tool.name, tool_category: tool.category }).catch(() => {})
+        }}
+      />
       <CompareFloatBar />
     </div>
   )

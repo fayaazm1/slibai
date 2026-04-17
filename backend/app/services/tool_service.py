@@ -5,6 +5,86 @@ from difflib import SequenceMatcher
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_FILE = BASE_DIR / "data" / "ai_tools.json"
 
+# maps what a user types to a category in the database
+# put phrases before single words so "image recognition" beats just "image"
+INTENT_MAP: list[tuple[list[str], str]] = [
+    # Computer Vision
+    (["image recognition", "object detection", "face detection", "image segmentation",
+      "image classification", "object tracking", "visual recognition", "pose estimation",
+      "ocr", "optical character", "image processing", "video analysis", "yolo",
+      "opencv", "vision", "visual", "image", "video", "detect object"], "Computer Vision"),
+
+    # Speech / Audio AI
+    (["speech recognition", "voice recognition", "speech synthesis", "text to speech",
+      "tts", "stt", "asr", "audio transcription", "transcription", "speaker",
+      "speech", "audio", "voice", "sound", "whisper"], "Speech / Audio AI"),
+
+    # LLM / Generative AI
+    (["chatbot", "text generation", "language model", "llm", "gpt", "rag",
+      "retrieval augmented", "generative ai", "prompt engineering", "chat",
+      "conversation", "dialogue", "story generation", "code generation",
+      "question answering", "summarization", "generative", "natural language generation"],
+     "LLM / Generative AI"),
+
+    # NLP
+    (["sentiment analysis", "named entity recognition", "ner", "text classification",
+      "machine translation", "pos tagging", "tokenization", "text processing",
+      "nlp", "natural language processing", "entity extraction", "topic modeling",
+      "text mining", "language understanding"], "NLP"),
+
+    # AI Agents
+    (["autonomous agent", "ai agent", "workflow automation", "multi-agent",
+      "agent orchestration", "tool use", "langchain", "autogpt", "autonomous",
+      "agent", "workflow", "orchestration"], "AI Agents"),
+
+    # Fine-Tuning / Training
+    (["fine-tune", "finetune", "model training", "train model", "transfer learning",
+      "custom model", "deep learning training", "neural network training",
+      "deep learning", "neural network", "machine learning",
+      "build model", "train a model", "classification model", "regression model",
+      "training", "fine tuning", "deep", "neural", "regression",
+      "prediction model", "ml model", "train"], "Fine-Tuning / Training"),
+
+    # Vector Databases
+    (["vector search", "similarity search", "embedding search", "semantic search",
+      "vector store", "vector db", "vector database", "embeddings", "pinecone",
+      "weaviate", "chroma", "faiss", "vector"], "Vector Databases"),
+
+    # MLOps / LLMOps
+    (["experiment tracking", "model versioning", "model monitoring", "mlops",
+      "llmops", "ci/cd ml", "ml pipeline", "model registry", "data versioning",
+      "mlflow", "kubeflow", "wandb"], "MLOps / LLMOps"),
+
+    # Model Serving / Inference
+    (["model serving", "model deployment", "inference server", "model api",
+      "triton", "torchserve", "bentoml", "serving", "inference", "deploy model"],
+     "Model Serving / Inference"),
+
+    # Multimodal AI
+    (["multimodal", "image and text", "vision language", "vlm", "clip",
+      "image captioning", "visual question answering", "vqa"], "Multimodal AI"),
+
+    # AI Developer Platforms
+    (["ai platform", "cloud ai", "vertex ai", "sagemaker", "azure ml",
+      "ai studio", "developer platform"], "AI Developer Platforms"),
+
+    # Developer Tools
+    (["sdk", "api integration", "developer tool", "library", "framework integration"],
+     "Developer Tools"),
+]
+
+# words to ignore when figuring out what the user actually wants
+# e.g. "I want to build image recognition" → we only care about "image recognition"
+_STOP_WORDS = {
+    "i", "want", "to", "build", "create", "make", "develop", "use", "need",
+    "a", "an", "the", "for", "that", "can", "do", "with", "my", "some",
+    "how", "get", "give", "me", "something", "system", "app", "application",
+    "implement", "using", "like", "is", "are", "in", "of", "and", "or",
+    # too generic — "model" and "ai" appear in every tool so they tell us nothing
+    "model", "ai", "tool", "tools", "technology", "solution", "feature",
+    "project", "help", "good", "best", "new", "better", "work", "works",
+}
+
 
 def load_tools():
     with open(DATA_FILE, "r", encoding="utf-8") as file:
@@ -21,6 +101,19 @@ def get_tool_by_id(tool_id: int):
         if tool["id"] == tool_id:
             return tool
     return None
+
+
+def _tool_signal_text(tool: dict) -> str:
+    """High-signal fields only: name, category, function, tags, use_cases."""
+    tags = " ".join(tool.get("tags", []) or [])
+    use_cases = " ".join(tool.get("use_cases", []) or [])
+    return " ".join([
+        tool.get("name", ""),
+        tool.get("category", ""),
+        tool.get("function", ""),
+        tags,
+        use_cases,
+    ]).lower()
 
 
 def _tool_full_text(tool: dict) -> str:
@@ -41,53 +134,92 @@ def _word_sim(a: str, b: str) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
-def search_tools(query: str):
+def detect_intent(query: str) -> str | None:
+    """Try to figure out which category the user is asking about.
+    Returns a category name like 'Computer Vision', or None if we can't tell."""
+    q = query.lower().strip()
+
+    # check phrases before single words — "image recognition" is more specific than "image"
+    for keywords, category in INTENT_MAP:
+        for kw in keywords:
+            if " " in kw and kw in q:
+                return category
+
+    # now check individual words (after removing filler words)
+    meaningful_words = [w for w in q.split() if w not in _STOP_WORDS and len(w) >= 3]
+    for keywords, category in INTENT_MAP:
+        for kw in keywords:
+            if " " not in kw:
+                if kw in meaningful_words:
+                    return category
+                # also catch typos — "vison" should still hit "vision"
+                for mw in meaningful_words:
+                    if _word_sim(kw, mw) >= 0.85 and abs(len(kw) - len(mw)) <= 2:
+                        return category
+
+    return None
+
+
+def search_tools(query: str) -> dict:
+    """Main search — scores every tool against the query and returns ranked results."""
     tools = load_tools()
     query_lower = query.lower().strip()
-    query_words = [w for w in query_lower.split() if len(w) >= 2]
 
-    if not query_words:
-        return []
-
-    # Pass 1: exact substring match across key fields
-    exact_results = [
-        tool for tool in tools
-        if query_lower in _tool_full_text(tool)
+    # pull out the words that actually matter for scoring
+    meaningful_words = [
+        w for w in query_lower.split()
+        if w not in _STOP_WORDS and len(w) >= 3
     ]
-    if exact_results:
-        return exact_results
 
-    # Pass 2: all query words are exact substrings somewhere in the tool text
-    word_results = [
-        tool for tool in tools
-        if all(w in _tool_full_text(tool) for w in query_words)
-    ]
-    if word_results:
-        return word_results
+    detected_category = detect_intent(query_lower)
 
-    # Pass 3: word-level fuzzy match
-    # Compare each query word against every individual word in the tool's text.
-    # This handles typos like "vison"→"vision" or "vsion"→"vision" correctly,
-    # because we compare short words to short words (not a short query to a long sentence).
-    THRESHOLD = 0.72
-    scored = []
+    scored: list[tuple[float, dict]] = []
+
     for tool in tools:
-        tool_words = [w for w in _tool_full_text(tool).split() if len(w) >= 2]
-        if not tool_words:
+        signal_text = _tool_signal_text(tool)
+        tool_category = tool.get("category", "")
+        in_target_category = (detected_category is not None and tool_category == detected_category)
+
+        # category match is the strongest signal (10 pts)
+        category_score = 10.0 if in_target_category else 0.0
+
+        # keyword hits in name / tags / use_cases (up to 5 pts)
+        keyword_score = 0.0
+        if meaningful_words:
+            matched = sum(1 for w in meaningful_words if w in signal_text)
+            keyword_score = (matched / len(meaningful_words)) * 5.0
+
+        # small bonus for near-matches so typos don't kill results
+        fuzzy_score = 0.0
+        if meaningful_words:
+            tool_words = [w for w in signal_text.split() if len(w) >= 3]
+            for qw in meaningful_words:
+                best = max((_word_sim(qw, tw) for tw in tool_words), default=0.0)
+                if best >= 0.80:
+                    fuzzy_score += best * 0.5
+
+        total = category_score + keyword_score + fuzzy_score
+
+        # if we know the category, only return tools from that category
+        if detected_category is not None and not in_target_category:
             continue
 
-        # For each query word, find the best-matching word in the tool's text
-        total = 0.0
-        for qw in query_words:
-            best = max((_word_sim(qw, tw) for tw in tool_words), default=0.0)
-            total += best
+        # no category detected — only keep tools with a decent score
+        # this stops vague queries like "I want an AI model" from dumping everything
+        if detected_category is None and total < 2.0:
+            continue
 
-        avg = total / len(query_words)
-        if avg >= THRESHOLD:
-            scored.append((avg, tool))
+        scored.append((total, tool))
 
     scored.sort(key=lambda x: x[0], reverse=True)
-    return [t for _, t in scored]
+
+    results = [t for _, t in scored]
+    return {
+        "results": results,
+        "detected_category": detected_category,
+        "total_results": len(results),
+        "query": query,
+    }
 
 
 def compare_tools(ids):

@@ -1,5 +1,7 @@
 import type { AITool } from '../types/tool'
 import { useCompare } from '../context/CompareContext'
+import { useAuth } from '../context/AuthContext'
+import { useBookmarks } from '../context/BookmarkContext'
 
 function costBadge(cost?: string) {
   if (!cost) return null
@@ -28,9 +30,12 @@ interface Props {
 
 export default function ToolCard({ tool, onSelect }: Props) {
   const { addTool, removeTool, isInCompare, compareList } = useCompare()
+  const { user } = useAuth()
+  const { toggleBookmark, isBookmarked } = useBookmarks()
   const inCompare = isInCompare(tool.id)
   const canAdd = compareList.length < 4
   const badge = costBadge(tool.cost)
+  const bookmarked = isBookmarked(tool.id)
 
   return (
     <div
@@ -55,13 +60,22 @@ export default function ToolCard({ tool, onSelect }: Props) {
         {tool.description}
       </p>
 
-      {/* bottom row: cost badge + compare button */}
+      {/* bottom row: cost badge + bookmark + compare button */}
       <div className="flex items-center justify-between pt-1 gap-2">
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap items-center">
           {badge && (
             <span className={`text-xs px-2.5 py-0.5 rounded-md font-medium ${badge}`}>
               {tool.cost}
             </span>
+          )}
+          {user && (
+            <button
+              onClick={e => { e.stopPropagation(); toggleBookmark(tool.id, tool.name, tool.category) }}
+              className={`text-base leading-none transition-colors ${bookmarked ? 'text-yellow-400' : 'text-zinc-700 hover:text-yellow-400'}`}
+              title={bookmarked ? 'Remove bookmark' : 'Save tool'}
+            >
+              {bookmarked ? '★' : '☆'}
+            </button>
           )}
         </div>
         <button

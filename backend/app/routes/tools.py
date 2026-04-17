@@ -17,7 +17,7 @@ def read_all_tools():
 
 @router.get("/search")
 def read_search_tools(q: str = Query(..., min_length=1)):
-    return search_tools(q)
+    return search_tools(q)  # returns { results, detected_category, query }
 
 
 @router.get("/compare")
