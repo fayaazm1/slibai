@@ -1,7 +1,6 @@
-"""
-All user-specific routes — profile, bookmarks, activity, use cases, insights, recommendations.
-Every endpoint requires a valid JWT (Bearer token).
-"""
+# Everything a logged-in user can do: update their profile, manage bookmarks,
+# track recently viewed tools, save use cases, and get personalized recommendations.
+# All endpoints here need a valid JWT — no anonymous access.
 
 from collections import Counter
 from datetime import datetime
@@ -130,7 +129,7 @@ def log_activity(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # If already viewed, update timestamp to move it to top of recents
+    # seen this tool before — bump the timestamp so it shows up at the top of recents
     existing = db.query(UserActivity).filter(
         UserActivity.user_id == current_user.id,
         UserActivity.tool_id == body.tool_id,

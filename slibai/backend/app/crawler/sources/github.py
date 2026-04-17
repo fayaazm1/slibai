@@ -185,7 +185,7 @@ def _infer_cost(license_info: dict | None) -> str:
 
 
 def _is_junk(repo: dict) -> bool:
-    """True if the repo looks like a tutorial, guide, demo, or collection — not a tool."""
+    """Returns True if this looks like a tutorial, guide, or demo rather than an actual library."""
     name = repo.get("name", "").lower().replace("-", " ").replace("_", " ")
     desc = (repo.get("description") or "").lower()
     combined = name + " " + desc
@@ -195,10 +195,9 @@ def _is_junk(repo: dict) -> bool:
 
 def _is_ai_relevant(repo: dict) -> bool:
     """
-    Secondary check: confirm the repo is actually AI-related by looking for
-    AI keywords in the name, description, or topics. Repos that land in AI
-    topic searches but aren't AI tools (e.g. generic CLI tooling, web frameworks
-    that happen to be starred a lot) get dropped here.
+    Double-checks that the repo is genuinely AI-related. Some repos land in
+    AI topic searches just because they're popular (generic CLI tools, web frameworks)
+    but don't belong in our directory — those get dropped here.
     """
     name = repo.get("name", "").lower()
     desc = (repo.get("description") or "").lower()
@@ -208,7 +207,7 @@ def _is_ai_relevant(repo: dict) -> bool:
 
 
 def _validate_tool(tool: dict) -> bool:
-    """Ensure the tool has the minimum fields needed to be useful in the UI."""
+    """Last gate before we keep a tool — must have a name, category, and a real description."""
     return bool(
         tool.get("name")
         and tool.get("category")

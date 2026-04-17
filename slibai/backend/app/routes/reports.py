@@ -1,8 +1,6 @@
-"""
-User-facing report endpoints.
-Any logged-in user can submit a report for a tool.
-Duplicate reports (same user + tool + issue type while still pending) are rejected.
-"""
+# Routes for submitting and viewing tool reports.
+# Users can only report once per issue type per tool while it's still pending —
+# we block duplicates so the admin queue doesn't fill up with the same complaint.
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session

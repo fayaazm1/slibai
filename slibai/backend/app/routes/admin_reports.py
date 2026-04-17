@@ -1,9 +1,5 @@
-"""
-Admin-only report management.
-  GET    /admin/reports               — list all reports (optional ?status=pending|resolved)
-  PATCH  /admin/reports/{id}/resolve  — mark a report as resolved
-  DELETE /admin/reports/{id}          — delete a report
-"""
+# Admin routes for managing user-submitted tool reports.
+# All three endpoints are admin-only — regular users get a 403.
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -19,7 +15,7 @@ router = APIRouter(prefix="/admin/reports", tags=["admin-reports"])
 
 
 def _enrich(report: ToolReport, db: Session) -> AdminReportResponse:
-    """Attach user name + email to a report row."""
+    """Pull the user's name + email and attach them to the report before returning it."""
     user = db.query(User).filter(User.id == report.user_id).first()
     return AdminReportResponse(
         id=report.id,

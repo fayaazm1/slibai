@@ -7,9 +7,8 @@ logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./slibai.db")
 
-# SQLite is only a local fallback — it is wiped on every Render redeployment.
-# If DATABASE_URL is not set in your deployment environment, all users will be
-# lost on every redeploy. Set DATABASE_URL to your Supabase PostgreSQL URL.
+# SQLite is just a local fallback — don't ship this to prod.
+# Without DATABASE_URL set, everything gets wiped on restart.
 if DATABASE_URL.startswith("sqlite"):
     logger.warning(
         "WARNING: Using SQLite fallback. "
@@ -18,13 +17,13 @@ if DATABASE_URL.startswith("sqlite"):
     )
     engine = create_engine(
         DATABASE_URL,
-        connect_args={"check_same_thread": False},  # required for SQLite + FastAPI
+        connect_args={"check_same_thread": False},  # SQLite + FastAPI need this
     )
 else:
     logger.info("Connected to PostgreSQL database.")
     engine = create_engine(
         DATABASE_URL,
-        pool_pre_ping=True,   # drops stale connections before use — prevents signin failures after idle
+        pool_pre_ping=True,   # test connections before use so we don't get errors after idle time
         pool_size=5,
         max_overflow=10,
     )
