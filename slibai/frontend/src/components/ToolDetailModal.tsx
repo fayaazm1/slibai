@@ -145,7 +145,7 @@ export default function ToolDetailModal({ tool, onClose, onOpen }: Props) {
   }
 
   function handleDownload() {
-    if (!genResult) return
+    if (!genResult || !tool) return
     const ext = LANG_EXTENSION[language] ?? 'txt'
     const filename = `${tool.name.toLowerCase().replace(/\s+/g, '_')}_example.${ext}`
     const blob = new Blob([genResult.code], { type: 'text/plain' })
