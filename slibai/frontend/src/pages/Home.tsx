@@ -6,6 +6,8 @@ import type { AITool } from '../types/tool'
 import ToolCard from '../components/ToolCard'
 import ToolDetailModal from '../components/ToolDetailModal'
 import CompareFloatBar from '../components/CompareFloatBar'
+import FilterBar from '../components/FilterBar'
+import type { FilterValues } from '../components/FilterBar'
 
 const FEATURED_COUNT = 9
 
@@ -23,6 +25,7 @@ export default function Home() {
   const [totalResults, setTotalResults] = useState<number | null>(null)
   const [searching, setSearching] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const [filters, setFilters] = useState<FilterValues>({ category: '', cost: '', language: '', developer: '' })
 
   useEffect(() => {
     getAllTools()
@@ -61,19 +64,66 @@ export default function Home() {
     return map
   }, [tools])
 
-  const isFiltered = !!debouncedQuery || !!selectedCategory
+  // derive dropdown options from the loaded tools so they always match real data
+  const filterOptions = useMemo(() => {
+    const categories = Array.from(new Set(tools.map(t => t.category))).filter(Boolean).sort()
+
+    const costs = Array.from(new Set(tools.map(t => t.cost).filter(Boolean))).sort() as string[]
+
+    // compatibility is stored as string[] in the JSON but typed as string — handle both
+    const langSet = new Set<string>()
+    tools.forEach(t => {
+      const c = (t as any).compatibility
+      if (!c) return
+      if (Array.isArray(c)) c.forEach((s: string) => langSet.add(s))
+      else langSet.add(c as string)
+    })
+    const languages = Array.from(langSet).sort()
+
+    // show top 40 developers by tool count so the list stays manageable
+    const devCount: Record<string, number> = {}
+    tools.forEach(t => { if (t.developer) devCount[t.developer] = (devCount[t.developer] ?? 0) + 1 })
+    const developers = Object.entries(devCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 40)
+      .map(([d]) => d)
+      .sort()
+
+    return { categories, costs, languages, developers }
+  }, [tools])
+
+  const activeFilterCount = Object.values(filters).filter(Boolean).length
+  const isFiltered = !!debouncedQuery || !!selectedCategory || activeFilterCount > 0
 
   const displayTools = useMemo(() => {
     // while a search is active, don't fall back to showing all tools — wait for real results
-    const list = debouncedQuery ? (searchResults ?? []) : tools
-    if (selectedCategory) return list.filter(t => t.category === selectedCategory)
-    return list
-  }, [searchResults, tools, selectedCategory, debouncedQuery])
+    const base = debouncedQuery ? (searchResults ?? []) : tools
+    return base.filter(t => {
+      if (selectedCategory && t.category !== selectedCategory) return false
+      if (filters.category && t.category !== filters.category) return false
+      if (filters.cost && !t.cost?.toLowerCase().includes(filters.cost.toLowerCase())) return false
+      if (filters.language) {
+        const c = (t as any).compatibility
+        const list: string[] = Array.isArray(c) ? c : c ? [c] : []
+        if (!list.some((s: string) => s.toLowerCase().includes(filters.language.toLowerCase()))) return false
+      }
+      if (filters.developer && !t.developer?.toLowerCase().includes(filters.developer.toLowerCase())) return false
+      return true
+    })
+  }, [searchResults, tools, selectedCategory, debouncedQuery, filters])
 
   const visibleTools = isFiltered || showAll ? displayTools : displayTools.slice(0, FEATURED_COUNT)
 
+  function handleFilterChange(key: keyof FilterValues, value: string) {
+    setFilters(prev => ({ ...prev, [key]: value }))
+    // picking a category from the dropdown clears the sidebar selection to avoid double-filtering
+    if (key === 'category') setSelectedCategory(null)
+    setShowAll(true)
+  }
+
   function handleCategoryClick(cat: string) {
     setSelectedCategory(cat)
+    setFilters(prev => ({ ...prev, category: '' })) // clear dropdown category when sidebar is clicked
     setQuery('')
     setShowAll(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -81,6 +131,7 @@ export default function Home() {
 
   function clearFilters() {
     setSelectedCategory(null)
+    setFilters({ category: '', cost: '', language: '', developer: '' })
     setQuery('')
     setDebouncedQuery('')       // skip the debounce delay, clear now
     setSearchResults(null)      // wipe results so nothing stale shows up
@@ -130,7 +181,17 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-10 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-10 space-y-8">
+
+        {/* ── Filter bar — always visible so users can combine with search ── */}
+        {!loading && tools.length > 0 && (
+          <FilterBar
+            options={filterOptions}
+            filters={filters}
+            onChange={handleFilterChange}
+            onReset={clearFilters}
+          />
+        )}
 
         {error && (
           <div className="bg-red-900/30 border border-red-800 rounded-xl p-4 text-red-400 text-sm">

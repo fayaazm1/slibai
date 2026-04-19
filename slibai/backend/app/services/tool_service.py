@@ -227,6 +227,33 @@ def compare_tools(ids):
     return [tool for tool in tools if tool["id"] in ids]
 
 
+def filter_tools(
+    category: str | None = None,
+    cost: str | None = None,
+    language: str | None = None,
+    developer: str | None = None,
+) -> list:
+    """Filter the full tool list by any combination of category, cost, language, or developer.
+    All params are optional — omitting one means 'no restriction on that field'."""
+    tools = load_tools()
+    results = []
+    for tool in tools:
+        if category and tool.get("category", "") != category:
+            continue
+        if cost and cost.lower() not in (tool.get("cost") or "").lower():
+            continue
+        if language:
+            # compatibility can be a list or a plain string depending on the source
+            compat = tool.get("compatibility") or []
+            compat_list = compat if isinstance(compat, list) else [compat]
+            if not any(language.lower() in c.lower() for c in compat_list):
+                continue
+        if developer and developer.lower() not in (tool.get("developer") or "").lower():
+            continue
+        results.append(tool)
+    return results
+
+
 def get_category_stats():
     tools = load_tools()
     stats = {}

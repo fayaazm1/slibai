@@ -19,5 +19,15 @@ export const searchTools = (q: string): Promise<SearchResponse> =>
 export const compareTools = (ids: number[]): Promise<AITool[]> =>
   api.get('/tools/compare', { params: { ids: ids.join(',') } }).then(r => r.data)
 
+export interface FilterParams {
+  category?: string
+  cost?: string
+  language?: string
+  developer?: string
+}
+
+export const filterTools = (params: FilterParams): Promise<{ results: AITool[]; total_results: number }> =>
+  api.get('/tools/filter', { params }).then(r => r.data)
+
 export const getCategoryStats = (): Promise<CategoryStat[]> =>
   api.get('/tools/stats/categories').then(r => r.data)

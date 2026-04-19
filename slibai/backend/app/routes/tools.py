@@ -1,11 +1,13 @@
 # Public tool endpoints — no auth needed.
 # Search, compare, get by ID, and pull category stats.
 from fastapi import APIRouter, HTTPException, Query
+from typing import Optional
 from app.services.tool_service import (
     get_all_tools,
     get_tool_by_id,
     search_tools,
     compare_tools,
+    filter_tools,
     get_category_stats,
 )
 
@@ -35,6 +37,19 @@ def read_compare_tools(ids: str = Query(..., description="Comma-separated IDs li
         raise HTTPException(status_code=404, detail="No matching tools found.")
 
     return tools
+
+
+@router.get("/filter")
+def read_filter_tools(
+    category: Optional[str] = None,
+    cost: Optional[str] = None,
+    language: Optional[str] = None,
+    developer: Optional[str] = None,
+):
+    """Filter tools by any combination of category, cost, language, or developer.
+    All params optional — works fine with just one or all four."""
+    results = filter_tools(category=category, cost=cost, language=language, developer=developer)
+    return {"results": results, "total_results": len(results)}
 
 
 @router.get("/stats/categories")
