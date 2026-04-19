@@ -1,6 +1,8 @@
 import json
+import os
 from pathlib import Path
 from difflib import SequenceMatcher
+from sqlalchemy.orm import Session
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_FILE = BASE_DIR / "data" / "ai_tools.json"
@@ -160,9 +162,9 @@ def detect_intent(query: str) -> str | None:
     return None
 
 
-def search_tools(query: str) -> dict:
-    """Main search — scores every tool against the query and returns ranked results."""
-    tools = load_tools()
+def _run_search(tools: list, query: str) -> dict:
+    """Core search logic — operates on any list of tool dicts (JSON or DB-converted).
+    Kept separate so both JSON and DB paths share identical scoring behavior."""
     query_lower = query.lower().strip()
 
     # pull out the words that actually matter for scoring
@@ -222,20 +224,25 @@ def search_tools(query: str) -> dict:
     }
 
 
+def search_tools(query: str) -> dict:
+    """Main search — scores every tool against the query and returns ranked results."""
+    return _run_search(load_tools(), query)
+
+
 def compare_tools(ids):
     tools = load_tools()
     return [tool for tool in tools if tool["id"] in ids]
 
 
-def filter_tools(
+def _run_filter(
+    tools: list,
     category: str | None = None,
     cost: str | None = None,
     language: str | None = None,
     developer: str | None = None,
 ) -> list:
-    """Filter the full tool list by any combination of category, cost, language, or developer.
-    All params are optional — omitting one means 'no restriction on that field'."""
-    tools = load_tools()
+    """Core filter logic — operates on any list of tool dicts (JSON or DB-converted).
+    Kept separate so both JSON and DB paths share identical filter behavior."""
     results = []
     for tool in tools:
         if category and tool.get("category", "") != category:
@@ -243,7 +250,7 @@ def filter_tools(
         if cost and cost.lower() not in (tool.get("cost") or "").lower():
             continue
         if language:
-            # compatibility can be a list or a plain string depending on the source
+            # compatibility is always a list in both JSON and DB (confirmed in field audit)
             compat = tool.get("compatibility") or []
             compat_list = compat if isinstance(compat, list) else [compat]
             if not any(language.lower() in c.lower() for c in compat_list):
@@ -252,6 +259,98 @@ def filter_tools(
             continue
         results.append(tool)
     return results
+
+
+def filter_tools(
+    category: str | None = None,
+    cost: str | None = None,
+    language: str | None = None,
+    developer: str | None = None,
+) -> list:
+    return _run_filter(load_tools(), category, cost, language, developer)
+
+
+# ── DB-backed reads (Phase 3) ────────────────────────────────────────────────
+# Only used when USE_DB_FOR_TOOLS=true. All JSON functions above stay untouched.
+
+def _tool_to_dict(tool) -> dict:
+    """Convert a Tool ORM row to a plain dict that matches the JSON response shape."""
+    return {
+        "id":           tool.id,
+        "name":         tool.name,
+        "category":     tool.category,
+        "function":     tool.function,
+        "description":  tool.description,
+        "developer":    tool.developer,
+        "version":      tool.version,
+        "cost":         tool.cost,
+        "compatibility": tool.compatibility,
+        "dependencies": tool.dependencies,
+        "tags":         tool.tags,
+        "use_cases":    tool.use_cases,
+        "social_impact": tool.social_impact,
+        "example_code": tool.example_code,
+        "official_url": tool.official_url,
+        "github_url":   tool.github_url,
+        "source":       tool.source,
+        "source_id":    tool.source_id,
+        "url_status":   tool.url_status,
+        "stars":        tool.stars,
+        "stale_count":  tool.stale_count,
+        "last_crawled": tool.last_crawled.isoformat() if tool.last_crawled else None,
+        "last_updated": tool.last_updated,
+        "scope":        tool.scope,
+        "type":         tool.type,
+    }
+
+
+def get_all_tools_db(db: Session) -> list:
+    from app.models.tool import Tool
+    rows = db.query(Tool).order_by(Tool.id).all()
+    return [_tool_to_dict(r) for r in rows]
+
+
+def get_tool_by_id_db(db: Session, tool_id: int) -> dict | None:
+    from app.models.tool import Tool
+    row = db.query(Tool).filter(Tool.id == tool_id).first()
+    return _tool_to_dict(row) if row else None
+
+
+def search_tools_db(db: Session, query: str) -> dict:
+    # Fetch all tools from DB then run the exact same Python scoring logic.
+    # We deliberately avoid rewriting the ranking in SQL — SequenceMatcher fuzzy
+    # matching cannot be replicated in SQLAlchemy without diverging behavior.
+    tools = get_all_tools_db(db)
+    return _run_search(tools, query)
+
+
+def filter_tools_db(
+    db: Session,
+    category: str | None = None,
+    cost: str | None = None,
+    language: str | None = None,
+    developer: str | None = None,
+) -> list:
+    # Fetch all tools from DB then run the exact same Python filter logic.
+    # Avoids JSONB array queries in SQL which are dialect-specific and fragile.
+    tools = get_all_tools_db(db)
+    return _run_filter(tools, category, cost, language, developer)
+
+
+def get_category_stats_db(db: Session) -> list:
+    from app.models.tool import Tool
+    from sqlalchemy import func
+    rows = db.query(Tool.category, func.count(Tool.id).label("count")) \
+             .group_by(Tool.category) \
+             .all()
+    return [{"category": row.category, "count": row.count} for row in rows]
+
+
+def compare_tools_db(db: Session, ids: list) -> list:
+    from app.models.tool import Tool
+    # ORDER BY id mirrors the JSON file ordering (tools are stored 1→186).
+    rows = db.query(Tool).filter(Tool.id.in_(ids)).order_by(Tool.id).all()
+    return [_tool_to_dict(r) for r in rows]
 
 
 def get_category_stats():

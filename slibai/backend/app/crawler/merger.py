@@ -12,6 +12,10 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "ai_tools.json"
 META_FILE = Path(__file__).resolve().parent.parent / "data" / "crawl_meta.json"
@@ -171,4 +175,158 @@ def merge(new_tools: list) -> dict:
     meta["total_tools"]  = stats["total"]
     _atomic_write(META_FILE, meta)
 
+    return stats
+
+
+def merge_to_db(new_tools: list, db: "Session") -> dict:
+    """
+    DB equivalent of merge() — upserts crawled tools into PostgreSQL.
+
+    Rules (mirroring the JSON merger exactly):
+      - Match on source + source_id first, then official_url, then name.
+      - Manual tools (source=None or source='manual'): only refresh stars,
+        url_status, last_crawled. Never overwrite hand-written fields.
+      - Auto tools: full field update, preserve id.
+      - New tools (no match): insert with next available id.
+      - Tools not seen this crawl: increment stale_count. Remove at >= 3.
+
+    Called only when USE_DB_FOR_CRAWLER_WRITES=true. JSON path is unchanged.
+    """
+    from app.models.tool import Tool
+    from sqlalchemy import func
+
+    now_dt = datetime.now(timezone.utc)
+    now_str = now_dt.isoformat()
+
+    # Load all existing DB rows into memory for matching
+    existing_rows = db.query(Tool).all()
+
+    # Build the same three lookup tables as the JSON merger
+    by_source: dict[str, Tool] = {}
+    by_name:   dict[str, Tool] = {}
+    by_url:    dict[str, Tool] = {}
+
+    for row in existing_rows:
+        if row.source and row.source_id:
+            by_source[f"{row.source}::{row.source_id}"] = row
+        name_key = _norm(row.name or "")
+        if name_key:
+            by_name[name_key] = row
+        url_key = _norm_url(row.official_url or "")
+        if url_key:
+            by_url[url_key] = row
+
+    max_id = db.query(func.max(Tool.id)).scalar() or 0
+    next_id = max_id + 1
+
+    seen_ids: set[int] = set()
+    stats = {"added": 0, "updated": 0, "removed": 0, "total": 0}
+
+    for new in new_tools:
+        src      = new.get("source", "unknown")
+        sid      = new.get("source_id", "")
+        name_key = _norm(new.get("name", ""))
+        url_key  = _norm_url(new.get("official_url", ""))
+
+        # Try to find existing row using the same priority order as the JSON merger
+        row = by_source.get(f"{src}::{sid}") if src and sid else None
+        if row is None:
+            row = by_url.get(url_key) if url_key else None
+        if row is None:
+            row = by_name.get(name_key) if name_key else None
+
+        if row is not None:
+            is_manual = (row.source is None or row.source == "manual")
+
+            if is_manual:
+                # Manual tools: only refresh live stats — never overwrite curated fields
+                row.last_crawled = now_dt
+                row.url_status   = new.get("url_status", "valid")
+                if "stars" in new:
+                    row.stars = new["stars"]
+            else:
+                # Auto-sourced tool: full refresh, preserve id
+                row.name         = new.get("name", row.name)
+                row.category     = new.get("category", row.category)
+                row.function     = new.get("function", row.function)
+                row.description  = new.get("description", row.description)
+                row.developer    = new.get("developer", row.developer)
+                row.version      = new.get("version", row.version)
+                row.cost         = new.get("cost", row.cost)
+                row.compatibility = new.get("compatibility", row.compatibility)
+                row.dependencies = new.get("dependencies", row.dependencies)
+                row.tags         = new.get("tags", row.tags)
+                row.use_cases    = new.get("use_cases", row.use_cases)
+                row.social_impact = new.get("social_impact", row.social_impact)
+                row.example_code = new.get("example_code", row.example_code)
+                row.official_url = new.get("official_url", row.official_url)
+                row.github_url   = new.get("github_url", row.github_url)
+                row.url_status   = new.get("url_status", "valid")
+                row.stars        = new.get("stars", row.stars)
+                row.last_updated = new.get("last_updated", row.last_updated)
+                row.last_crawled = now_dt
+                row.stale_count  = 0
+
+            seen_ids.add(row.id)
+            stats["updated"] += 1
+
+        else:
+            # New tool — insert with next available id
+            tool = Tool(
+                id           = next_id,
+                name         = new.get("name", ""),
+                category     = new.get("category", ""),
+                function     = new.get("function", ""),
+                description  = new.get("description", ""),
+                developer    = new.get("developer"),
+                version      = new.get("version"),
+                cost         = new.get("cost"),
+                compatibility = new.get("compatibility"),
+                dependencies  = new.get("dependencies"),
+                tags          = new.get("tags"),
+                use_cases     = new.get("use_cases"),
+                social_impact = new.get("social_impact"),
+                example_code  = new.get("example_code"),
+                official_url  = new.get("official_url"),
+                github_url    = new.get("github_url"),
+                source        = src,
+                source_id     = str(sid) if sid else None,
+                url_status    = new.get("url_status", "valid"),
+                stars         = new.get("stars"),
+                stale_count   = 0,
+                last_crawled  = now_dt,
+                last_updated  = new.get("last_updated"),
+            )
+            db.add(tool)
+
+            # Register in lookup tables so later tools in this batch don't re-insert
+            if src and sid:
+                by_source[f"{src}::{sid}"] = tool
+            if name_key:
+                by_name[name_key] = tool
+            url_key2 = _norm_url(new.get("official_url", ""))
+            if url_key2:
+                by_url[url_key2] = tool
+
+            seen_ids.add(next_id)
+            next_id += 1
+            stats["added"] += 1
+
+    # Apply stale logic to auto-sourced tools that weren't seen this crawl
+    for row in existing_rows:
+        if row.id in seen_ids:
+            continue
+        is_manual = (row.source is None or row.source == "manual")
+        if is_manual:
+            continue  # manual tools are never staleness-removed
+        stale = (row.stale_count or 0) + 1
+        if stale >= MAX_STALE_CRAWLS:
+            db.delete(row)
+            stats["removed"] += 1
+        else:
+            row.stale_count = stale
+
+    db.commit()
+
+    stats["total"] = db.query(func.count(Tool.id)).scalar()
     return stats

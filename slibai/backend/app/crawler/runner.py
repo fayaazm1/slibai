@@ -5,11 +5,16 @@
 # We use a threading lock so two crawls can't run at the same time —
 # e.g. if the scheduler fires while someone manually triggered one via the API.
 
+import os
 import threading
 from datetime import datetime, timezone
 
 from app.crawler.sources import github, huggingface
-from app.crawler.merger import merge, META_FILE, _load
+from app.crawler.merger import merge, merge_to_db, META_FILE, _load
+
+# When true, crawl results are also written into PostgreSQL after the JSON merge.
+# The JSON merge always runs regardless — DB write is additive, not a replacement.
+_WRITE_TO_DB = os.getenv("USE_DB_FOR_CRAWLER_WRITES", "false").lower() == "true"
 
 _lock = threading.Lock()
 
@@ -69,8 +74,24 @@ def run_crawl(
         print(f"[Crawler] {len(all_tools)} total tools collected — merging …")
 
         stats = merge(all_tools)
-        print(f"[Crawler] Done ✓  added={stats['added']}  updated={stats['updated']}  "
+        print(f"[Crawler] JSON merge done ✓  added={stats['added']}  updated={stats['updated']}  "
               f"removed={stats['removed']}  total={stats['total']}")
+
+        if _WRITE_TO_DB:
+            try:
+                from app.database import SessionLocal
+                db = SessionLocal()
+                try:
+                    db_stats = merge_to_db(all_tools, db)
+                    print(f"[Crawler] DB merge done ✓  added={db_stats['added']}  "
+                          f"updated={db_stats['updated']}  removed={db_stats['removed']}  "
+                          f"total={db_stats['total']}")
+                    stats["db"] = db_stats
+                finally:
+                    db.close()
+            except Exception as e:
+                # DB write failure never kills the crawl — JSON is the source of truth for now
+                print(f"[Crawler] DB merge failed (JSON is still up to date): {e}")
 
         _status["last_run"]   = datetime.now(timezone.utc).isoformat()
         _status["last_stats"] = stats

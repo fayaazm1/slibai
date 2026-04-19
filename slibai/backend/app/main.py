@@ -13,6 +13,7 @@ import app.models.bookmark  # noqa: F401
 import app.models.activity  # noqa: F401
 import app.models.use_case  # noqa: F401
 import app.models.report    # noqa: F401
+import app.models.tool      # noqa: F401  ← Phase 1: registers Tool table with create_all
 from app.routes.tools import router as tools_router
 from app.routes.admin import router as admin_router
 from app.routes.auth import router as auth_router
