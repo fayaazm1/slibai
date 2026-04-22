@@ -1,5 +1,4 @@
-# Public tool endpoints — no auth needed.
-# Search, compare, get by ID, and pull category stats.
+# public tool endpoints — read-only, no auth required
 import os
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
@@ -22,8 +21,7 @@ from app.services.tool_service import (
 
 router = APIRouter(prefix="/tools", tags=["AI Tools"])
 
-# Flip to "true" in your .env (or Render/Railway env vars) to switch reads to PostgreSQL.
-# Default is JSON so this is safe to deploy without any env change.
+# set USE_DB_FOR_TOOLS=true in .env to read from PostgreSQL instead of the JSON file
 _USE_DB = os.getenv("USE_DB_FOR_TOOLS", "false").lower() == "true"
 
 

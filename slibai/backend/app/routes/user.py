@@ -23,7 +23,7 @@ from app.schemas.user import (
     ChangePasswordRequest, ProfileUpdate,
     UseCaseCreate, UseCaseResponse,
 )
-from app.services.tool_service import get_all_tools
+from app.services.tool_service import get_all_tools_db
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -265,7 +265,7 @@ def get_recommendations(
     )
     top_categories = [cat for cat, _ in Counter(categories).most_common(3)]
 
-    all_tools = get_all_tools()
+    all_tools = get_all_tools_db(db)
 
     if not top_categories:
         return all_tools[:6]

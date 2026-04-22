@@ -38,6 +38,8 @@ export default function Navbar() {
     { to: '/', label: 'Browse' },
     { to: '/compare', label: compareList.length > 0 ? `Compare (${compareList.length})` : 'Compare' },
     { to: '/stats', label: 'Stats' },
+    { to: '/scan', label: 'Scan' },
+    { to: '/ai-insights', label: 'AI Insights' },
     ...(user?.is_admin ? [{ to: '/admin', label: 'Admin' }] : []),
   ]
 

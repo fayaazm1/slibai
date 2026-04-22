@@ -5,6 +5,8 @@ Nothing fancy, just the basics to get users in and out safely.
 
 import os
 import secrets
+import time
+from collections import defaultdict
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
@@ -29,6 +31,28 @@ from app.schemas.auth import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# ── Brute-force protection (#6) ──────────────────────────────────────────────
+# In-memory per-email tracker. Resets on server restart — acceptable for beta.
+_failed_logins: dict[str, list[float]] = defaultdict(list)
+_MAX_ATTEMPTS = 5
+_WINDOW_SECONDS = 300  # 5-minute sliding window
+
+
+def _check_login_rate_limit(email: str) -> None:
+    now = time.time()
+    recent = [t for t in _failed_logins[email] if now - t < _WINDOW_SECONDS]
+    _failed_logins[email] = recent
+    if len(recent) >= _MAX_ATTEMPTS:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many failed login attempts. Please try again in 5 minutes.",
+        )
+
+
+def _record_failed_login(email: str) -> None:
+    _failed_logins[email].append(time.time())
+
 
 # grab URLs and OAuth keys from env so nothing is hardcoded
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -60,8 +84,8 @@ def signup(body: SignUpRequest, db: Session = Depends(get_db)):
     if len(body.password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
 
-    # whoever signs up first gets admin — useful for initial setup
-    is_first_user = db.query(User).count() == 0
+    # first admin is whoever signs up when no admin exists yet
+    is_first_user = db.query(User).filter(User.is_admin == True).count() == 0
 
     user = User(
         email=body.email,
@@ -78,11 +102,17 @@ def signup(body: SignUpRequest, db: Session = Depends(get_db)):
 
 @router.post("/signin", response_model=TokenResponse)
 def signin(body: SignInRequest, db: Session = Depends(get_db)):
+    _check_login_rate_limit(body.email)
+
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not user.hashed_password:
+        _record_failed_login(body.email)
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not verify_password(body.password, user.hashed_password):
+        _record_failed_login(body.email)
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="This account has been deactivated")
     return _token_response(user)
 
 
@@ -105,13 +135,14 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
     try:
         send_reset_email(to_email=user.email, reset_link=reset_link)
     except Exception as exc:
-        # email failed so clear the token — user can try again from scratch
+        # log server-side only — never expose SMTP details in the API response
+        print(f"[Auth] Reset email failed for {user.email}: {exc}")
         user.reset_token = None
         user.reset_token_expires = None
         db.commit()
         raise HTTPException(
             status_code=500,
-            detail=f"Could not send reset email: {exc}",
+            detail="Could not send reset email. Please try again later.",
         )
 
     return {"message": "Password reset link sent to your email."}
@@ -122,7 +153,7 @@ def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.reset_token == body.token).first()
     if not user:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
-    if user.reset_token_expires < datetime.utcnow():
+    if not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
         raise HTTPException(status_code=400, detail="Reset token has expired")
     if len(body.new_password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
@@ -196,10 +227,11 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
-    elif user.provider == "local":
-        # user already has an account with this email, just link Google to it
-        user.provider_id = provider_id
-        db.commit()
+    else:
+        # link or refresh the provider_id regardless of which provider they signed up with
+        if user.provider_id != provider_id:
+            user.provider_id = provider_id
+            db.commit()
 
     jwt_token = create_access_token(user.id, user.email)
     return RedirectResponse(f"{FRONTEND_URL}/?token={jwt_token}")
@@ -264,10 +296,11 @@ async def github_callback(code: str, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
-    elif user.provider == "local":
-        # user already has an account with this email, just link GitHub to it
-        user.provider_id = provider_id
-        db.commit()
+    else:
+        # link or refresh the provider_id regardless of which provider they signed up with
+        if user.provider_id != provider_id:
+            user.provider_id = provider_id
+            db.commit()
 
     jwt_token = create_access_token(user.id, user.email)
     return RedirectResponse(f"{FRONTEND_URL}/?token={jwt_token}")

@@ -8,6 +8,7 @@ import ToolDetailModal from '../components/ToolDetailModal'
 import CompareFloatBar from '../components/CompareFloatBar'
 import FilterBar from '../components/FilterBar'
 import type { FilterValues } from '../components/FilterBar'
+import { useBackendHealth, BACKEND_STATUS_MSG } from '../hooks/useBackendHealth'
 
 const FEATURED_COUNT = 9
 
@@ -27,11 +28,34 @@ export default function Home() {
   const [showAll, setShowAll] = useState(false)
   const [filters, setFilters] = useState<FilterValues>({ category: '', cost: '', language: '', developer: '' })
 
+  const backendStatus = useBackendHealth()
+
+  // Retry the initial tool fetch automatically — handles Render.com cold starts
+  // where the first few requests time out before the dyno wakes up.
   useEffect(() => {
-    getAllTools()
-      .then(setTools)
-      .catch(() => setError('Failed to connect to backend. Make sure it is running on port 8000.'))
-      .finally(() => setLoading(false))
+    let cancelled = false
+    let retries = 0
+    const MAX_RETRIES = 12  // 12 × 5 s = 60 s max wait
+
+    async function tryLoad() {
+      if (cancelled) return
+      try {
+        const data = await getAllTools()
+        if (!cancelled) { setTools(data); setLoading(false) }
+      } catch {
+        if (cancelled) return
+        retries++
+        if (retries >= MAX_RETRIES) {
+          setError('Backend is not responding. Please refresh the page or try again later.')
+          setLoading(false)
+        } else {
+          setTimeout(tryLoad, 5000)
+        }
+      }
+    }
+
+    tryLoad()
+    return () => { cancelled = true }
   }, [])
 
   // debounce search
@@ -270,22 +294,31 @@ export default function Home() {
 
           {/* skeleton while loading tools or waiting on search results */}
           {(loading || searching) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: FEATURED_COUNT }).map((_, i) => (
-                <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 animate-pulse">
-                  <div className="flex gap-3 mb-3">
-                    <div className="w-10 h-10 bg-zinc-700 rounded-xl shrink-0" />
-                    <div className="flex-1">
-                      <div className="h-3.5 bg-zinc-700 rounded mb-2 w-3/4" />
-                      <div className="h-3 bg-zinc-800 rounded w-1/2" />
-                    </div>
-                  </div>
-                  <div className="h-3 bg-zinc-800 rounded mb-1.5" />
-                  <div className="h-3 bg-zinc-800 rounded mb-1.5" />
-                  <div className="h-3 bg-zinc-800 rounded w-2/3" />
+            <>
+              {/* Show backend wakeup status when the initial load is taking longer than normal */}
+              {loading && backendStatus !== 'ok' && BACKEND_STATUS_MSG[backendStatus] && (
+                <div className="flex items-center gap-3 mb-4 text-zinc-400 text-sm">
+                  <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                  {BACKEND_STATUS_MSG[backendStatus]}
                 </div>
-              ))}
-            </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: FEATURED_COUNT }).map((_, i) => (
+                  <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 animate-pulse">
+                    <div className="flex gap-3 mb-3">
+                      <div className="w-10 h-10 bg-zinc-700 rounded-xl shrink-0" />
+                      <div className="flex-1">
+                        <div className="h-3.5 bg-zinc-700 rounded mb-2 w-3/4" />
+                        <div className="h-3 bg-zinc-800 rounded w-1/2" />
+                      </div>
+                    </div>
+                    <div className="h-3 bg-zinc-800 rounded mb-1.5" />
+                    <div className="h-3 bg-zinc-800 rounded mb-1.5" />
+                    <div className="h-3 bg-zinc-800 rounded w-2/3" />
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
           {!loading && !searching && visibleTools.length === 0 && (

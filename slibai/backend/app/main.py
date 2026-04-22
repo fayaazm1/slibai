@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -14,6 +15,8 @@ import app.models.activity  # noqa: F401
 import app.models.use_case  # noqa: F401
 import app.models.report    # noqa: F401
 import app.models.tool      # noqa: F401  ← Phase 1: registers Tool table with create_all
+import app.models.scan_log     # noqa: F401  ← registers ScanLog table with create_all
+import app.models.tool_request  # noqa: F401  ← registers ToolRequest table with create_all
 from app.routes.tools import router as tools_router
 from app.routes.admin import router as admin_router
 from app.routes.auth import router as auth_router
@@ -22,6 +25,9 @@ from app.routes.user import router as user_router
 from app.routes.reports import router as reports_router
 from app.routes.admin_reports import router as admin_reports_router
 from app.routes.codegen import router as codegen_router
+from app.routes.scan import router as scan_router
+from app.routes.research import router as research_router
+from app.routes.admin_tools import router as admin_tools_router
 from app.crawler.runner import run_crawl
 
 
@@ -32,6 +38,18 @@ _scheduler = BackgroundScheduler(timezone="UTC")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)  # create any missing tables on startup
+
+    # Idempotent migration: add is_active to tools if it doesn't exist yet.
+    # PostgreSQL's ADD COLUMN IF NOT EXISTS is safe to run on every startup.
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text(
+                "ALTER TABLE tools ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true"
+            ))
+            conn.commit()
+    except Exception:
+        pass  # SQLite or column already exists — both are fine
 
     _scheduler.add_job(
         run_crawl,
@@ -54,9 +72,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Restrict CORS to specific origins. Set ALLOWED_ORIGINS in .env as a comma-separated list.
+# Falls back to localhost for local dev if the env var is not set.
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -70,6 +93,9 @@ app.include_router(user_router)
 app.include_router(reports_router)
 app.include_router(admin_reports_router)
 app.include_router(codegen_router)
+app.include_router(scan_router)
+app.include_router(research_router)
+app.include_router(admin_tools_router)
 
 
 @app.get("/")

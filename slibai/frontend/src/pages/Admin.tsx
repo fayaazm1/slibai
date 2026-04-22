@@ -5,6 +5,7 @@ import {
   getUsers, deactivateUser, activateUser, deleteUser, AdminUser,
   triggerCrawl, getCrawlStatus, CrawlStatus,
   getAdminReports,
+  getPendingToolRequestsCount,
 } from '../api/admin'
 
 export default function Admin() {
@@ -20,7 +21,8 @@ export default function Admin() {
   const [crawling, setCrawling]         = useState(false)
   const [crawlMsg, setCrawlMsg]         = useState('')
 
-  const [pendingReports, setPendingReports] = useState(0)
+  const [pendingReports, setPendingReports]           = useState(0)
+  const [pendingToolRequests, setPendingToolRequests] = useState(0)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function Admin() {
     fetchUsers()
     fetchCrawlStatus()
     fetchPendingReports()
+    fetchPendingToolRequests()
   }, [user])
 
   function fetchUsers() {
@@ -48,6 +51,11 @@ export default function Admin() {
   function fetchPendingReports() {
     if (!token) return
     getAdminReports(token, 'pending').then(r => setPendingReports(r.length)).catch(() => {})
+  }
+
+  function fetchPendingToolRequests() {
+    if (!token) return
+    getPendingToolRequestsCount(token).then(setPendingToolRequests).catch(() => {})
   }
 
   async function handleRunCrawler() {
@@ -132,10 +140,10 @@ export default function Admin() {
 
         {/* ── Overview stats ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard label="Total Users"     value={users.length}   color="text-white" />
-          <StatCard label="Active"          value={activeCount}    color="text-green-400" />
-          <StatCard label="OAuth Users"     value={oauthCount}     color="text-indigo-400" />
-          <StatCard label="Pending Reports" value={pendingReports} color="text-amber-400" />
+          <StatCard label="Total Users"     value={users.length}        color="text-white" />
+          <StatCard label="Active"          value={activeCount}         color="text-green-400" />
+          <StatCard label="Pending Reports" value={pendingReports}      color="text-amber-400" />
+          <StatCard label="Tool Requests"   value={pendingToolRequests} color="text-purple-400" />
         </div>
 
         {/* ── Quick links ── */}
@@ -162,6 +170,32 @@ export default function Admin() {
             <div>
               <p className="text-white font-semibold text-sm">All Users</p>
               <p className="text-slate-400 text-xs">{users.length} registered users</p>
+            </div>
+            <svg className="w-4 h-4 text-slate-600 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </Link>
+
+          <Link to="/admin/libraries" className="bg-slate-800 border border-slate-700 hover:border-green-600/50 rounded-xl p-5 flex items-center gap-4 transition-colors group">
+            <div className="w-10 h-10 rounded-xl bg-green-900/30 border border-green-700/40 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">Manage Libraries</p>
+              <p className="text-slate-400 text-xs">Add or deactivate AI tools in the catalogue</p>
+            </div>
+            <svg className="w-4 h-4 text-slate-600 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </Link>
+
+          <Link to="/admin/tool-requests" className="bg-slate-800 border border-slate-700 hover:border-purple-600/50 rounded-xl p-5 flex items-center gap-4 transition-colors group">
+            <div className="w-10 h-10 rounded-xl bg-purple-900/30 border border-purple-700/40 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">Tool Requests</p>
+              <p className="text-slate-400 text-xs">{pendingToolRequests > 0 ? <span className="text-purple-400">{pendingToolRequests} pending</span> : 'No pending requests'}</p>
             </div>
             <svg className="w-4 h-4 text-slate-600 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </Link>

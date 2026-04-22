@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_FILE = BASE_DIR / "data" / "ai_tools.json"
 
-# maps what a user types to a category in the database
-# put phrases before single words so "image recognition" beats just "image"
+# maps natural language phrases to our category names
+# longer phrases go first so "image recognition" wins before we check plain "image"
 INTENT_MAP: list[tuple[list[str], str]] = [
     # Computer Vision
     (["image recognition", "object detection", "face detection", "image segmentation",
@@ -75,8 +75,8 @@ INTENT_MAP: list[tuple[list[str], str]] = [
      "Developer Tools"),
 ]
 
-# words to ignore when figuring out what the user actually wants
-# e.g. "I want to build image recognition" → we only care about "image recognition"
+# words that don't tell us anything useful — strip these before scoring
+# e.g. "I want to build image recognition" → we really only care about "image recognition"
 _STOP_WORDS = {
     "i", "want", "to", "build", "create", "make", "develop", "use", "need",
     "a", "an", "the", "for", "that", "can", "do", "with", "my", "some",
@@ -106,7 +106,7 @@ def get_tool_by_id(tool_id: int):
 
 
 def _tool_signal_text(tool: dict) -> str:
-    """High-signal fields only: name, category, function, tags, use_cases."""
+    # the fields that actually matter for ranking — name, category, function, tags, use cases
     tags = " ".join(tool.get("tags", []) or [])
     use_cases = " ".join(tool.get("use_cases", []) or [])
     return " ".join([
@@ -137,24 +137,24 @@ def _word_sim(a: str, b: str) -> float:
 
 
 def detect_intent(query: str) -> str | None:
-    """Try to figure out which category the user is asking about.
-    Returns a category name like 'Computer Vision', or None if we can't tell."""
+    # try to map what the user typed to one of our categories
+    # returns something like 'Computer Vision', or None if we can't tell
     q = query.lower().strip()
 
-    # check phrases before single words — "image recognition" is more specific than "image"
+    # check multi-word phrases first — more specific than single words
     for keywords, category in INTENT_MAP:
         for kw in keywords:
             if " " in kw and kw in q:
                 return category
 
-    # now check individual words (after removing filler words)
+    # strip filler words, then check individual keywords
     meaningful_words = [w for w in q.split() if w not in _STOP_WORDS and len(w) >= 3]
     for keywords, category in INTENT_MAP:
         for kw in keywords:
             if " " not in kw:
                 if kw in meaningful_words:
                     return category
-                # also catch typos — "vison" should still hit "vision"
+                # catch typos like "vison" matching "vision"
                 for mw in meaningful_words:
                     if _word_sim(kw, mw) >= 0.85 and abs(len(kw) - len(mw)) <= 2:
                         return category
@@ -163,11 +163,10 @@ def detect_intent(query: str) -> str | None:
 
 
 def _run_search(tools: list, query: str) -> dict:
-    """Core search logic — operates on any list of tool dicts (JSON or DB-converted).
-    Kept separate so both JSON and DB paths share identical scoring behavior."""
+    # shared scoring logic used by both the JSON and DB paths — don't duplicate this
     query_lower = query.lower().strip()
 
-    # pull out the words that actually matter for scoring
+    # strip filler words so "I want to build image recognition" becomes ["image", "recognition"]
     meaningful_words = [
         w for w in query_lower.split()
         if w not in _STOP_WORDS and len(w) >= 3
@@ -185,29 +184,30 @@ def _run_search(tools: list, query: str) -> dict:
         # category match is the strongest signal (10 pts)
         category_score = 10.0 if in_target_category else 0.0
 
-        # keyword hits in name / tags / use_cases (up to 5 pts)
+        # exact/substring keyword hits across name, tags, use cases (up to 5 pts)
         keyword_score = 0.0
         if meaningful_words:
             matched = sum(1 for w in meaningful_words if w in signal_text)
             keyword_score = (matched / len(meaningful_words)) * 5.0
 
-        # small bonus for near-matches so typos don't kill results
+        # fuzzy score handles typos — "tenserflow" should still find TensorFlow
+        # weight is 2.5 so a single strong match (≥0.80 sim) clears the 2.0 threshold below
         fuzzy_score = 0.0
         if meaningful_words:
             tool_words = [w for w in signal_text.split() if len(w) >= 3]
             for qw in meaningful_words:
                 best = max((_word_sim(qw, tw) for tw in tool_words), default=0.0)
-                if best >= 0.80:
-                    fuzzy_score += best * 0.5
+                if best >= 0.85:
+                    fuzzy_score += best * 2.5
 
         total = category_score + keyword_score + fuzzy_score
 
-        # if we know the category, only return tools from that category
+        # if we know the category, only show tools in that category
         if detected_category is not None and not in_target_category:
             continue
 
-        # no category detected — only keep tools with a decent score
-        # this stops vague queries like "I want an AI model" from dumping everything
+        # no category — need at least a score of 2.0 so vague queries don't dump everything
+        # a single good fuzzy match scores ~2.0+, so typo searches still get through
         if detected_category is None and total < 2.0:
             continue
 
@@ -225,7 +225,6 @@ def _run_search(tools: list, query: str) -> dict:
 
 
 def search_tools(query: str) -> dict:
-    """Main search — scores every tool against the query and returns ranked results."""
     return _run_search(load_tools(), query)
 
 
@@ -270,11 +269,11 @@ def filter_tools(
     return _run_filter(load_tools(), category, cost, language, developer)
 
 
-# ── DB-backed reads (Phase 3) ────────────────────────────────────────────────
-# Only used when USE_DB_FOR_TOOLS=true. All JSON functions above stay untouched.
+# DB reads — only active when USE_DB_FOR_TOOLS=true in .env
+# the JSON functions above are untouched and still work as fallback
 
 def _tool_to_dict(tool) -> dict:
-    """Convert a Tool ORM row to a plain dict that matches the JSON response shape."""
+    # turns a SQLAlchemy row into a plain dict with the same shape as the JSON tools
     return {
         "id":           tool.id,
         "name":         tool.name,
@@ -284,10 +283,10 @@ def _tool_to_dict(tool) -> dict:
         "developer":    tool.developer,
         "version":      tool.version,
         "cost":         tool.cost,
-        "compatibility": tool.compatibility,
-        "dependencies": tool.dependencies,
-        "tags":         tool.tags,
-        "use_cases":    tool.use_cases,
+        "compatibility": tool.compatibility or [],
+        "dependencies": tool.dependencies or [],
+        "tags":         tool.tags or [],
+        "use_cases":    tool.use_cases or [],
         "social_impact": tool.social_impact,
         "example_code": tool.example_code,
         "official_url": tool.official_url,
@@ -306,20 +305,19 @@ def _tool_to_dict(tool) -> dict:
 
 def get_all_tools_db(db: Session) -> list:
     from app.models.tool import Tool
-    rows = db.query(Tool).order_by(Tool.id).all()
+    rows = db.query(Tool).filter(Tool.is_active.isnot(False)).order_by(Tool.id).all()
     return [_tool_to_dict(r) for r in rows]
 
 
 def get_tool_by_id_db(db: Session, tool_id: int) -> dict | None:
     from app.models.tool import Tool
-    row = db.query(Tool).filter(Tool.id == tool_id).first()
+    row = db.query(Tool).filter(Tool.id == tool_id, Tool.is_active.isnot(False)).first()
     return _tool_to_dict(row) if row else None
 
 
 def search_tools_db(db: Session, query: str) -> dict:
-    # Fetch all tools from DB then run the exact same Python scoring logic.
-    # We deliberately avoid rewriting the ranking in SQL — SequenceMatcher fuzzy
-    # matching cannot be replicated in SQLAlchemy without diverging behavior.
+    # pull tools from DB and run the same Python scoring — keeps parity with the JSON path
+    # (SequenceMatcher can't run in SQL anyway)
     tools = get_all_tools_db(db)
     return _run_search(tools, query)
 
@@ -331,8 +329,7 @@ def filter_tools_db(
     language: str | None = None,
     developer: str | None = None,
 ) -> list:
-    # Fetch all tools from DB then run the exact same Python filter logic.
-    # Avoids JSONB array queries in SQL which are dialect-specific and fragile.
+    # same reason as search — JSONB array filtering in SQL is messy, easier to do it in Python
     tools = get_all_tools_db(db)
     return _run_filter(tools, category, cost, language, developer)
 
@@ -341,6 +338,7 @@ def get_category_stats_db(db: Session) -> list:
     from app.models.tool import Tool
     from sqlalchemy import func
     rows = db.query(Tool.category, func.count(Tool.id).label("count")) \
+             .filter(Tool.is_active.isnot(False)) \
              .group_by(Tool.category) \
              .all()
     return [{"category": row.category, "count": row.count} for row in rows]
@@ -348,8 +346,7 @@ def get_category_stats_db(db: Session) -> list:
 
 def compare_tools_db(db: Session, ids: list) -> list:
     from app.models.tool import Tool
-    # ORDER BY id mirrors the JSON file ordering (tools are stored 1→186).
-    rows = db.query(Tool).filter(Tool.id.in_(ids)).order_by(Tool.id).all()
+    rows = db.query(Tool).filter(Tool.id.in_(ids), Tool.is_active.isnot(False)).order_by(Tool.id).all()
     return [_tool_to_dict(r) for r in rows]
 
 

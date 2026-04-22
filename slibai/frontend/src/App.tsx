@@ -14,6 +14,10 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import Scan from './pages/Scan'
+import Research from './pages/Research'
+import AdminLibraries from './pages/AdminLibraries'
+import AdminToolRequests from './pages/AdminToolRequests'
 
 export default function App() {
   return (
@@ -39,6 +43,10 @@ export default function App() {
                     <Route path="/admin/reports" element={<AdminReports />} />
                     <Route path="/admin/users" element={<AdminAllUsers />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/scan" element={<Scan />} />
+                    <Route path="/ai-insights" element={<Research />} />
+                    <Route path="/admin/libraries" element={<AdminLibraries />} />
+                    <Route path="/admin/tool-requests" element={<AdminToolRequests />} />
                   </Routes>
                 </>
               } />

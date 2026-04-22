@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime
 from sqlalchemy.types import JSON
 from app.database import Base
 
@@ -61,3 +61,6 @@ class Tool(Base):
     # Classification — only present in ~half the tools, so nullable
     scope = Column(String(50), nullable=True)   # "in_scope_primary" | "in_scope_secondary"
     type  = Column(String(50), nullable=True)   # "framework" | "library" | "saas-integrated" etc.
+
+    # Soft-delete — False means hidden from browse/search/scanner; True (default) means visible
+    is_active = Column(Boolean, nullable=False, default=True, server_default='true')
