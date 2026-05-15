@@ -1,3 +1,8 @@
+// Main browse page — the landing view after auth pages. Loads all tools on mount,
+// exposes a 300ms-debounced search bar that hits the ranked search endpoint, and
+// shows a cold-start status message from useBackendHealth while the Render dyno wakes.
+// FilterBar, ToolCard, ToolDetailModal, and CompareFloatBar are all rendered here
+// so state for the selected tool and active filters stays in one place.
 import { useState, useEffect, useMemo } from 'react'
 import { getAllTools, searchTools } from '../api/tools'
 import { logActivity } from '../api/user'
@@ -10,6 +15,7 @@ import FilterBar from '../components/FilterBar'
 import type { FilterValues } from '../components/FilterBar'
 import { useBackendHealth, BACKEND_STATUS_MSG } from '../hooks/useBackendHealth'
 
+// 9 tools shown before the "View all" button — fits a 3-column grid without scrolling on typical screens
 const FEATURED_COUNT = 9
 
 export default function Home() {
@@ -32,6 +38,7 @@ export default function Home() {
 
   // Retry the initial tool fetch automatically — handles Render.com cold starts
   // where the first few requests time out before the dyno wakes up.
+  // 12 retries × 5 s ≈ 60 s, which covers the observed worst-case cold start window.
   useEffect(() => {
     let cancelled = false
     let retries = 0
@@ -58,7 +65,8 @@ export default function Home() {
     return () => { cancelled = true }
   }, [])
 
-  // debounce search
+  // 300ms debounce — chosen after manual testing. Fast typists flooded the backend
+  // below 200ms; above 400ms the search started feeling sluggish.
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 300)
     return () => clearTimeout(t)
@@ -78,7 +86,8 @@ export default function Home() {
       .finally(() => setSearching(false))
   }, [debouncedQuery])
 
-  // build a map of category → unique function types for the sidebar
+  // Category → unique function types for the "All Categories" section below the tool grid.
+  // Built from the loaded tool list so it always reflects what's actually in the catalogue.
   const categoryMap = useMemo(() => {
     const map = new Map<string, Set<string>>()
     for (const t of tools) {
@@ -94,7 +103,8 @@ export default function Home() {
 
     const costs = Array.from(new Set(tools.map(t => t.cost).filter(Boolean))).sort() as string[]
 
-    // compatibility is stored as string[] in the JSON but typed as string — handle both
+    // compatibility is stored as string[] in the crawled JSON but the type says string —
+    // older entries in the catalogue may be a plain string, so we handle both shapes here
     const langSet = new Set<string>()
     tools.forEach(t => {
       const c = (t as any).compatibility
@@ -157,7 +167,7 @@ export default function Home() {
     setSelectedCategory(null)
     setFilters({ category: '', cost: '', language: '', developer: '' })
     setQuery('')
-    setDebouncedQuery('')       // skip the debounce delay, clear now
+    setDebouncedQuery('')       // bypass the 300ms debounce — we want the clear to feel instant
     setSearchResults(null)      // wipe results so nothing stale shows up
     setDetectedCategory(null)
     setTotalResults(null)

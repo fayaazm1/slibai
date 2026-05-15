@@ -1,3 +1,10 @@
+// Root component — wraps everything in the three global providers and wires up routes.
+// Provider nesting order matters: BookmarkProvider is inside AuthProvider because
+// it needs the token from useAuth() to persist bookmarks to the server on change.
+// CompareProvider is inside BookmarkProvider because compare state is independent of auth
+// but the float bar (rendered inside app pages) needs both contexts available.
+// Auth pages (signin, signup, forgot/reset password) are placed outside the Navbar
+// catch-all route so they render full-screen without the nav chrome.
 import { Routes, Route } from 'react-router-dom'
 import { CompareProvider } from './context/CompareContext'
 import { AuthProvider } from './context/AuthContext'

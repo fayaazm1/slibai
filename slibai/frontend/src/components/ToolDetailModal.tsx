@@ -1,3 +1,9 @@
+// Right-side drawer that slides in when a tool card is clicked. Houses the full
+// tool details, an AI code generator (language + optional use-case input → Gemini),
+// an "Explain Code" button that interprets the generated snippet, a file download,
+// and a Report Issue button for signed-in users. All codegen and explain state is
+// reset when tool.id changes so switching tools doesn't show stale results from the
+// previous one. Escape key closes the drawer via a keydown listener on document.
 import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import SyntaxHighlighter from 'react-syntax-highlighter'
@@ -25,7 +31,7 @@ const LANG_HIGHLIGHT_MAP: Record<string, string> = {
   cpp: 'cpp',
 }
 
-// file extensions for the download button
+// Maps language keys to file extensions for the generated-code download filename
 const LANG_EXTENSION: Record<string, string> = {
   python: 'py',
   javascript: 'js',
@@ -144,6 +150,8 @@ export default function ToolDetailModal({ tool, onClose, onOpen }: Props) {
     }
   }
 
+  // Creates a temporary Blob URL, clicks it programmatically to trigger the browser's
+  // save dialog, then immediately revokes the URL to avoid memory leaks.
   function handleDownload() {
     if (!genResult || !tool) return
     const ext = LANG_EXTENSION[language] ?? 'txt'

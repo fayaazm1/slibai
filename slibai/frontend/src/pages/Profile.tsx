@@ -1,3 +1,9 @@
+// User profile page with six tabs: overview, saved tools, recently viewed,
+// use cases, personal insights (bar chart of category exploration), and settings.
+// The active tab is synced to a ?tab= URL query param so deep-linking and the
+// Navbar dropdown (which navigates to /profile?tab=saved, etc.) work correctly.
+// Password change is only shown for local accounts — OAuth users can't set a password
+// because their credentials are managed by Google or GitHub.
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
@@ -9,7 +15,7 @@ import {
   updateProfile, changePassword,
   Insights, Activity, UseCase,
 } from '../api/user'
-import { PRESET_AVATARS, DEFAULT_AVATAR, getAvatar } from '../utils/avatars'
+import { PRESET_AVATARS, getAvatar } from '../utils/avatars'
 import type { AITool } from '../types/tool'
 
 type Tab = 'overview' | 'saved' | 'recent' | 'usecases' | 'insights' | 'settings'
@@ -74,7 +80,8 @@ export default function Profile() {
     return t && VALID_TABS.includes(t) ? t : 'overview'
   })
 
-  // keep the active tab in sync if the URL changes while already on this page
+  // Without this second effect, clicking a profile link from the Navbar dropdown while
+  // already on /profile would update the URL but leave the displayed tab stale.
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const t = params.get('tab') as Tab | null
@@ -117,7 +124,8 @@ export default function Profile() {
     getRecommendations(token).then(setRecommendations).catch(() => {})
   }, [token])
 
-  // pre-fill the settings form with the user's current info
+  // Pre-fill the settings form so the user sees their current name and avatar
+  // rather than empty fields when they first land on the settings tab.
   useEffect(() => {
     if (user) {
       setEditName(user.name ?? '')

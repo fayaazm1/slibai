@@ -1,3 +1,8 @@
+// Side-by-side tool comparison page. Reads the selected tools from CompareContext
+// (populated on the Browse, Scan, and AI Insights pages via ToolCard / result rows),
+// renders a comparison table, and then offers per-tool AI code generation powered by
+// Gemini. A "Generate for All" button fires requests sequentially with a 500ms gap
+// between each one so we don't hit the backend's rate limit in quick succession.
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
@@ -10,6 +15,7 @@ import type { AITool } from '../types/tool'
 
 // ── constants ────────────────────────────────────────────────────────────────
 
+// Fields rendered as rows in the comparison table; `colored` flags the cost row for green/yellow/red styling
 const FIELDS: Array<{ key: keyof AITool; label: string; colored?: boolean }> = [
   { key: 'category',     label: 'Category' },
   { key: 'function',     label: 'Function' },
@@ -48,7 +54,8 @@ function costColor(cost?: string) {
 export default function Compare() {
   const { compareList, removeTool } = useCompare()
 
-  // per-tool codegen state — keyed by tool.id
+  // All codegen state is keyed by tool.id so each column in the comparison grid
+  // has its own language selection, use-case input, and generated result independently.
   const [langs,       setLangs]       = useState<Record<number, string>>({})
   const [useCases,    setUseCases]    = useState<Record<number, string>>({})
   const [results,     setResults]     = useState<Record<number, CodeGenResult | null>>({})
@@ -98,7 +105,8 @@ export default function Compare() {
     }
   }
 
-  // generate for all tools sequentially so we don't hammer the quota
+  // Sequential generation avoids hammering the Gemini quota that backs the codegen endpoint.
+  // A parallel Promise.all would fire all requests at once and reliably trigger rate limiting.
   async function handleGenerateAll() {
     setGeneratingAll(true)
     for (let i = 0; i < compareList.length; i++) {

@@ -1,3 +1,9 @@
+// Statistics page — a read-only overview of the catalogue. Loads per-category
+// counts and the full tool list in parallel, then derives free/freemium/paid
+// buckets client-side so the backend doesn't need a separate cost-distribution endpoint.
+// The ranked table uses maxCount to scale inline progress bars relative to the
+// largest category rather than a fixed max, so bars look proportional regardless
+// of how many tools are in the catalogue.
 import { useState, useEffect } from 'react'
 import { getCategoryStats, getAllTools } from '../api/tools'
 import type { CategoryStat, AITool } from '../types/tool'
@@ -16,6 +22,8 @@ export default function Stats() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Cost buckets: "free" is an exact match; freemium catches both "freemium" and "free tier"
+  // phrasing in the data; anything else with a non-empty cost string goes into paid.
   const freeCount = tools.filter(t => t.cost?.toLowerCase() === 'free').length
   const freemiumCount = tools.filter(t => {
     const l = t.cost?.toLowerCase() ?? ''

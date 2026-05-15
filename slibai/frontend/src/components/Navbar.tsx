@@ -1,3 +1,10 @@
+// Sticky top navbar with a desktop dropdown menu and a full-screen mobile panel.
+// Three separate effects handle: (1) closing the desktop dropdown on outside click via a ref,
+// (2) closing the mobile menu on route change so it doesn't stay open after navigation,
+// and (3) preventing background scroll while the mobile menu is open.
+// The Compare link shows a live count badge from CompareContext so users can see
+// how many tools are queued without opening the float bar. Admin link only appears
+// for users where user.is_admin is true — checked here in the navLinks array.
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useCompare } from '../context/CompareContext'
@@ -14,7 +21,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
-  // close desktop dropdown when clicking outside
+  // mousedown rather than click so the dropdown closes before any new click targets are focused
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -28,7 +35,9 @@ export default function Navbar() {
   // close mobile menu on route change
   useEffect(() => { setMobileOpen(false) }, [pathname])
 
-  // prevent background scroll while mobile menu is open
+  // Locking body overflow prevents the page behind the mobile overlay from scrolling.
+  // The cleanup restores '' (empty) rather than 'auto' to avoid overriding any
+  // higher-level overflow settings that may already exist on the page.
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }

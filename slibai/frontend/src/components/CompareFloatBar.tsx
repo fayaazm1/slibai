@@ -1,4 +1,9 @@
-import { useState } from 'react'
+// Fixed bottom bar that shows the tools currently queued for comparison.
+// Returns null when the compare list is empty so the bar takes no space at all —
+// pages add pb-28 to their containers so their content doesn't hide behind this bar
+// when it's visible. The warning toast auto-dismisses after 3 seconds via a timeout
+// rather than user input so it doesn't block the add-more flow.
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCompare } from '../context/CompareContext'
 
@@ -6,13 +11,19 @@ export default function CompareFloatBar() {
   const { compareList, removeTool, clearCompare } = useCompare()
   const navigate = useNavigate()
   const [showWarning, setShowWarning] = useState(false)
+  const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => { if (warningTimerRef.current) clearTimeout(warningTimerRef.current) }
+  }, [])
 
   if (compareList.length === 0) return null
 
   function handleCompare() {
     if (compareList.length < 2) {
+      if (warningTimerRef.current) clearTimeout(warningTimerRef.current)
       setShowWarning(true)
-      setTimeout(() => setShowWarning(false), 3000)
+      warningTimerRef.current = setTimeout(() => setShowWarning(false), 3000)
       return
     }
     navigate('/compare')

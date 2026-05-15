@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react'
+// Admin dashboard — overview of users, crawler, and pending action queues.
+// Non-admins and unauthenticated visitors are redirected away in the mount effect.
+// The crawler section polls getCrawlStatus every 3 seconds after triggerCrawl returns
+// so the stats card updates live without the admin having to manually refresh.
+// StatCard and ProviderBadge are small local components used only within this file.
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -20,10 +25,15 @@ export default function Admin() {
   const [crawlStatus, setCrawlStatus]   = useState<CrawlStatus | null>(null)
   const [crawling, setCrawling]         = useState(false)
   const [crawlMsg, setCrawlMsg]         = useState('')
+  const crawlIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const [pendingReports, setPendingReports]           = useState(0)
   const [pendingToolRequests, setPendingToolRequests] = useState(0)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    return () => { if (crawlIntervalRef.current) clearInterval(crawlIntervalRef.current) }
+  }, [])
 
   useEffect(() => {
     if (!user) { navigate('/signin'); return }
@@ -65,11 +75,12 @@ export default function Admin() {
     try {
       const res = await triggerCrawl(token)
       setCrawlMsg(res.message)
-      const interval = setInterval(async () => {
+      crawlIntervalRef.current = setInterval(async () => {
         const status = await getCrawlStatus(token)
         setCrawlStatus(status)
         if (!status.running) {
-          clearInterval(interval)
+          clearInterval(crawlIntervalRef.current!)
+          crawlIntervalRef.current = null
           setCrawling(false)
           setCrawlMsg(
             status.error
@@ -113,6 +124,7 @@ export default function Admin() {
     }
   }
 
+  // Show only the 10 most recent users here; the full list lives at /admin/users
   const recentUsers = [...users].slice(0, 10)
   const activeCount = users.filter(u => u.is_active).length
   const oauthCount  = users.filter(u => u.provider !== 'local').length

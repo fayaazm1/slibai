@@ -1,3 +1,9 @@
+// AI Insights page — displays real-world GitHub usage data collected by the research scan.
+// Loads summary metrics, top-20 libraries, and category breakdown on mount, then polls
+// every 3 seconds while a scan is running so the progress bar stays live. The "Run New Scan"
+// button is admin-only; regular users see results but cannot trigger a new scan themselves.
+// The loadData callback is extracted so both the mount retry loop and the poll can call it
+// without duplicating the three parallel fetch calls.
 import { useState, useEffect, useCallback } from 'react'
 import {
   getResearchSummary,
@@ -14,6 +20,7 @@ import { useAuth } from '../context/AuthContext'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useBackendHealth, BACKEND_STATUS_MSG } from '../hooks/useBackendHealth'
 
+// Indigo/violet palette — cycling through it keeps adjacent bars visually distinct
 const BAR_COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#818cf8', '#7c3aed', '#4f46e5', '#4338ca']
 
 export default function Research() {
@@ -72,7 +79,9 @@ export default function Research() {
     return () => { cancelled = true }
   }, [loadData])
 
-  // Poll every 3 s while a scan is running; auto-refresh results when it finishes
+  // 3-second poll gives the UI a live feel without hammering the backend.
+  // When the scan finishes (status.running goes false), loadData runs one more time
+  // so the page refreshes with the new results immediately, not on the next page load.
   useEffect(() => {
     if (!scanStatus?.running) return
     const id = setInterval(async () => {
@@ -129,7 +138,10 @@ export default function Research() {
   const scanRunning = scanStatus?.running ?? false
   const noData = !summary && topLibs.length === 0
 
-  // Progress percentage: prefer repo-level granularity, fall back to query-level
+  // Repo-level granularity is preferred for the progress bar because a single query
+  // can yield dozens of repos, so query count alone would jump in large steps.
+  // Fall back to query-level progress when repo totals aren't populated yet
+  // (early in the scan before the repo-fetching stage begins).
   const scanProgress = scanStatus && scanStatus.repos_total > 0
     ? Math.min(99, Math.round((scanStatus.repos_scanned / scanStatus.repos_total) * 100))
     : scanStatus && scanStatus.queries_total > 0

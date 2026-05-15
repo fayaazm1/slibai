@@ -1,3 +1,9 @@
+// GitHub repo AI stack scanner. Accepts a public repo URL, calls the unauthenticated
+// /scan endpoint, and shows matched catalogue tools with confidence scores alongside
+// unrecognized libraries. Signed-in users can submit an unrecognized library as a
+// tool request directly from the results — anonymous visitors see a "Sign in to suggest" hint.
+// Rate limit errors from GitHub's API surface with a wait-time extracted from either
+// the Retry-After header or the detail message body.
 import { useState } from 'react'
 import { scanRepo, submitToolRequest } from '../api/scan'
 import type { ScanResult, MatchedLib } from '../api/scan'
@@ -44,6 +50,9 @@ export default function Scan() {
 
       if (status === 429) {
         setRateLimited(true)
+        // Try to extract a human-readable wait time from three possible places:
+        // the standard Retry-After header, a "N minute" phrase in the detail body,
+        // or a "N second" phrase in the detail body. All three get converted to minutes.
         const retryAfterHeader = axErr.response?.headers?.['retry-after']
         const minuteMatch = apiDetail?.match(/(\d+)\s*minute/i)
         const secondMatch = apiDetail?.match(/(\d+)\s*second/i)
@@ -55,6 +64,8 @@ export default function Scan() {
           setRateLimitWait(Math.ceil(parseInt(secondMatch[1]) / 60))
         }
       } else if (isNetworkError && backendStatus !== 'ok') {
+        // A network error while the backend health check hasn't gone green yet
+        // almost certainly means the Render dyno is still cold-starting, not a real scan failure
         setError('Cannot reach the backend. It may be starting up — please wait ~30 seconds and try again.')
       } else {
         setError(apiDetail ?? 'Scan failed. Check the URL and make sure the repository is public.')

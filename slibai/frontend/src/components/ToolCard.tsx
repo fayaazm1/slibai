@@ -1,3 +1,7 @@
+// Individual tool card shown in the Browse and Profile pages. Clicking the card
+// opens ToolDetailModal. The compare and bookmark buttons use stopPropagation so
+// they don't also trigger the card click. Compare is disabled when 4 tools are
+// already selected — the 4-tool cap matches the Compare page's grid layout.
 import type { AITool } from '../types/tool'
 import { useCompare } from '../context/CompareContext'
 import { useAuth } from '../context/AuthContext'
@@ -12,7 +16,8 @@ function costBadge(cost?: string) {
   return 'bg-slate-700 text-slate-400 border border-slate-600'
 }
 
-// Deterministic color palette for letter avatars
+// Deterministic color palette for letter avatars — the same tool always gets the same color
+// across page loads because the hash is derived from the tool name, not a random seed.
 const AVATAR_COLORS = [
   'bg-violet-600', 'bg-blue-600', 'bg-emerald-600', 'bg-orange-500',
   'bg-pink-600', 'bg-cyan-600', 'bg-rose-600', 'bg-indigo-600',
