@@ -5,7 +5,16 @@
 #
 # All data reflects SAMPLE-BASED ANALYSIS — not a census of GitHub.
 # See research_service.py for full methodology documentation.
-
+"""
+FastAPI routes for the Research Dashboard — exposes results from the sample-based
+GitHub analysis run by research_service.py. The summary, top-libraries, and
+category-breakdown endpoints are unauthenticated so the Research page loads for any
+visitor without requiring login. The scan trigger is admin-only because each run
+consumes ~100-200 GitHub API requests. The _scan_lock + _scan_running pattern here
+mirrors what crawler/runner.py does — it prevents a second admin from launching a
+parallel scan while one is already in progress, which would produce corrupted progress
+state and compete for the same GitHub rate limit quota.
+"""
 import threading
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -20,11 +29,21 @@ from app.services.research_service import load_results, run_research_scan, get_p
 router = APIRouter(prefix="/research", tags=["research"])
 
 # ── Scan job state (mirrors pattern from crawler runner.py) ──────────────────
+# Without this lock, two admins hitting /run-scan simultaneously could both pass
+# the _scan_running check before either sets it to True, launching parallel scans
 _scan_lock = threading.Lock()
-_scan_running = False
+_scan_running = False  # module-level so it persists for the lifetime of the background thread
 
 
 def _run_scan_background() -> None:
+    """
+    Wrapper that runs run_research_scan() in a background thread and clears
+    _scan_running when it finishes, regardless of success or failure.
+
+    The try/except ensures that any exception from run_research_scan is caught
+    and logged here rather than silently leaving _scan_running=True forever,
+    which would block all future scan triggers until the server restarted.
+    """
     global _scan_running
     try:
         run_research_scan()
@@ -43,6 +62,14 @@ def get_summary():
 
     Note: Based on sample-based analysis of GitHub repositories.
     See /research/top-libraries for per-library breakdown.
+
+    Returns:
+        dict: scan_date, repos_scanned, unique_libs, methodology, data_source,
+            limitations, and assumptions from the last completed scan.
+
+    Note:
+        Returns 404 if no scan has ever been run — the frontend shows a prompt
+        to run the first scan rather than crashing on the missing data.
     """
     data = load_results()
     if not data:
@@ -72,6 +99,17 @@ def get_top_libraries(limit: int = 10, db: Session = Depends(get_db)):
       - tool_id / tool_name: if in_catalogue, the matching tool's ID and name
 
     Based on sample-based analysis — see /research/summary for methodology.
+
+    Catalogue matching normalizes both sides by stripping separators and lowercasing,
+    then also checks tool tags so aliases like "Weights & Biases" match "wandb".
+
+    Args:
+        limit (int): How many top libraries to return. Defaults to 10.
+        db (Session): Database session for catalogue lookup.
+
+    Returns:
+        dict: Keys are "data" (enriched library list), "total_results" (full count
+            before limit), and "note" (methodology reminder).
     """
     data = load_results()
     if not data:
@@ -113,7 +151,17 @@ def get_top_libraries(limit: int = 10, db: Session = Depends(get_db)):
 
 @router.get("/category-breakdown")
 def get_category_breakdown():
-    """Returns library counts aggregated by functional category."""
+    """
+    Returns library counts aggregated by functional category, sorted by total usage.
+
+    Useful for the bar chart on the Research page — shows which AI categories
+    (NLP/LLMs, ML Frameworks, etc.) appear most often across sampled repos.
+
+    Returns:
+        dict: Key "data" contains a list of dicts with category, library_count
+            (distinct libraries in that category), and total_uses (sum of repo
+            appearances across all libraries in the category).
+    """
     data = load_results()
     if not data:
         raise HTTPException(status_code=404, detail="No research data available.")
@@ -146,6 +194,13 @@ def trigger_research_scan(
 
     Warning: consumes GitHub API quota (~100-200 requests per scan).
     Set GITHUB_TOKEN env var for higher rate limits (5000 req/hr vs 60/hr).
+
+    Args:
+        background_tasks (BackgroundTasks): FastAPI's background task queue.
+        _ (User): Admin user from get_admin_user — enforces auth only.
+
+    Returns:
+        dict: Confirmation message and a note to poll /research/summary for results.
     """
     global _scan_running
     with _scan_lock:
@@ -162,5 +217,14 @@ def trigger_research_scan(
 
 @router.get("/scan-status")
 def scan_status():
-    """Returns full progress details for the current or last research scan."""
+    """
+    Returns full progress details for the current or last research scan.
+
+    The frontend polls this endpoint while a scan is running to drive the
+    live progress indicator on the Research page.
+
+    Returns:
+        dict: Progress fields from research_service._progress — includes running
+            state, current stage, queries completed, repos scanned, and any error.
+    """
     return get_progress()

@@ -1,3 +1,14 @@
+"""
+Entry point for the FastAPI application — wires together routes, middleware, the
+database, and the background crawler scheduler. load_dotenv() is called before any
+app imports so environment variables are available to every module during startup.
+The lifespan context manager handles all setup and teardown: creating missing tables,
+running an idempotent is_active column migration, and starting the APScheduler daily
+crawl. All model modules are imported at the top not because we call anything on them,
+but because SQLAlchemy's create_all needs their table definitions registered before it
+runs. CORS origins come from ALLOWED_ORIGINS in .env — on Render that should be set
+to the Vercel frontend URL, not left as the localhost default.
+"""
 import os
 from contextlib import asynccontextmanager
 
@@ -37,6 +48,22 @@ _scheduler = BackgroundScheduler(timezone="UTC")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    FastAPI lifespan context manager — runs setup before the app accepts requests
+    and teardown when it shuts down.
+
+    create_all is idempotent: it only creates tables that don't exist yet, never
+    drops or alters existing ones, so it's safe on every cold start. The is_active
+    migration is also idempotent — ADD COLUMN IF NOT EXISTS either adds the column
+    or does nothing. The scheduler shuts down with wait=False so a deploy doesn't
+    hang waiting for an in-flight 24-hour crawl to finish.
+
+    Args:
+        app (FastAPI): The application instance, passed in by the framework.
+
+    Yields:
+        None: Everything between yield and the end of the function runs on shutdown.
+    """
     Base.metadata.create_all(bind=engine)  # create any missing tables on startup
 
     # Idempotent migration: add is_active to tools if it doesn't exist yet.
@@ -100,4 +127,14 @@ app.include_router(admin_tools_router)
 
 @app.get("/")
 def root():
+    """
+    Health check endpoint polled by the frontend on startup.
+
+    The useBackendHealth hook on the frontend hits this to show the user whether
+    the Render backend has warmed up yet after a cold start. No auth, no database
+    access — kept intentionally trivial so it responds as fast as possible.
+
+    Returns:
+        dict: Static confirmation message.
+    """
     return {"message": "SLIBAI backend is running"}

@@ -1,6 +1,13 @@
 """
 All the auth stuff lives here — signup, signin, password reset, and OAuth for Google/GitHub.
 Nothing fancy, just the basics to get users in and out safely.
+
+JWT creation delegates to auth/jwt_utils.py and password hashing to auth/password.py —
+this file only orchestrates the flows. The brute-force protection is in-memory and
+resets on server restart, which is an acceptable tradeoff for a demo deployment but
+would need a Redis-backed solution before going to real production. OAuth callbacks
+redirect to FRONTEND_URL after success so both local dev and Render work without
+hardcoding a domain.
 """
 
 import os
@@ -35,11 +42,22 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # ── Brute-force protection (#6) ──────────────────────────────────────────────
 # In-memory per-email tracker. Resets on server restart — acceptable for beta.
 _failed_logins: dict[str, list[float]] = defaultdict(list)
+# 5 attempts before lockout — low enough to stop automated attacks, high enough
+# that a real user misremembering their password isn't immediately locked out
 _MAX_ATTEMPTS = 5
 _WINDOW_SECONDS = 300  # 5-minute sliding window
 
 
 def _check_login_rate_limit(email: str) -> None:
+    """
+    Raises 429 if the given email has hit the failed login threshold.
+
+    Prunes stale entries from the tracker on every call so the dict doesn't
+    grow unbounded over time — only timestamps within the sliding window count.
+
+    Args:
+        email (str): The email address being checked.
+    """
     now = time.time()
     recent = [t for t in _failed_logins[email] if now - t < _WINDOW_SECONDS]
     _failed_logins[email] = recent
@@ -51,6 +69,15 @@ def _check_login_rate_limit(email: str) -> None:
 
 
 def _record_failed_login(email: str) -> None:
+    """
+    Records the current timestamp as a failed login attempt for the given email.
+
+    Called on both wrong-email and wrong-password outcomes so an attacker can't
+    determine which field was incorrect by observing when the counter increments.
+
+    Args:
+        email (str): The email address the failed attempt was made against.
+    """
     _failed_logins[email].append(time.time())
 
 
@@ -70,6 +97,18 @@ GITHUB_REDIRECT_URI = f"{BACKEND_URL}/auth/github/callback"
 # small helper so we don't repeat the same token-building logic everywhere
 
 def _token_response(user: User) -> TokenResponse:
+    """
+    Builds the standard TokenResponse returned by every successful auth endpoint.
+
+    Centralizing this means signup, signin, and both OAuth callbacks all return
+    the same shape without duplicating the create_access_token call.
+
+    Args:
+        user (User): The authenticated User ORM object.
+
+    Returns:
+        TokenResponse: Contains the JWT access_token and serialized user profile.
+    """
     token = create_access_token(user.id, user.email)
     return TokenResponse(access_token=token, user=UserResponse.model_validate(user))
 
@@ -78,6 +117,20 @@ def _token_response(user: User) -> TokenResponse:
 
 @router.post("/signup", response_model=TokenResponse, status_code=201)
 def signup(body: SignUpRequest, db: Session = Depends(get_db)):
+    """
+    Creates a new local user account and returns a JWT.
+
+    The first-admin bootstrap gives admin privileges to whoever signs up when
+    no admin exists yet — convenient for setting up a fresh deployment without
+    needing a separate seed script.
+
+    Args:
+        body (SignUpRequest): Email, name, and plaintext password.
+        db (Session): Database session.
+
+    Returns:
+        TokenResponse: JWT and user profile for the newly created account.
+    """
     if db.query(User).filter(User.email == body.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -102,6 +155,21 @@ def signup(body: SignUpRequest, db: Session = Depends(get_db)):
 
 @router.post("/signin", response_model=TokenResponse)
 def signin(body: SignInRequest, db: Session = Depends(get_db)):
+    """
+    Authenticates a local user and returns a JWT.
+
+    Rate limit check runs before the database query so failed attempts are
+    counted regardless of whether the email exists in the system. Both
+    wrong-email and wrong-password cases return identical 401 details to
+    avoid leaking which field was incorrect to an attacker.
+
+    Args:
+        body (SignInRequest): Email and plaintext password.
+        db (Session): Database session.
+
+    Returns:
+        TokenResponse: JWT and user profile on success.
+    """
     _check_login_rate_limit(body.email)
 
     user = db.query(User).filter(User.email == body.email).first()
@@ -120,13 +188,31 @@ def signin(body: SignInRequest, db: Session = Depends(get_db)):
 
 @router.post("/forgot-password")
 def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Generates a password reset token and sends it to the user's email address.
+
+    Always returns 200 regardless of whether the email exists — we don't want
+    to tell callers whether a given address is registered. If the email send
+    fails, the token is cleared immediately so a broken partial state doesn't
+    leave a valid-but-undelivered token sitting in the database.
+
+    Args:
+        body (ForgotPasswordRequest): The email address requesting a reset.
+        db (Session): Database session.
+
+    Returns:
+        dict: A generic success message regardless of outcome.
+    """
     user = db.query(User).filter(User.email == body.email).first()
     # always return 200 — we don't want to tell people whether an email is registered or not
     if not user or user.provider != "local":
         return {"message": "If that email is registered you will receive a reset link."}
 
+    # token_urlsafe(32) gives 256 bits of entropy — more than enough to be unguessable
     token = secrets.token_urlsafe(32)
     user.reset_token = token
+    # 1 hour gives someone enough time to check their email without rushing, but is short
+    # enough that a token sitting in a compromised inbox doesn't stay valid indefinitely
     user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
     db.commit()
 
@@ -150,6 +236,20 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
 @router.post("/reset-password")
 def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Validates a reset token and updates the user's password.
+
+    The token is nulled out immediately after a successful reset so it cannot
+    be reused — each token is strictly single-use. Expiry is also checked
+    before the password update to reject tokens that are valid but stale.
+
+    Args:
+        body (ResetPasswordRequest): The reset token and the new plaintext password.
+        db (Session): Database session.
+
+    Returns:
+        dict: Confirmation message on success.
+    """
     user = db.query(User).filter(User.reset_token == body.token).first()
     if not user:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
@@ -159,6 +259,7 @@ def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
 
     user.hashed_password = hash_password(body.new_password)
+    # clear the token immediately — tokens are single-use and cannot be replayed
     user.reset_token = None
     user.reset_token_expires = None
     db.commit()
@@ -169,6 +270,19 @@ def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user)):
+    """
+    Returns the currently authenticated user's profile.
+
+    The frontend calls this on startup to re-hydrate auth state from a stored
+    token — if this returns 401, the token has expired and the user needs to
+    sign in again.
+
+    Args:
+        current_user (User): Injected by get_current_user dependency.
+
+    Returns:
+        UserResponse: The authenticated user's profile fields.
+    """
     return current_user
 
 
@@ -176,6 +290,15 @@ def me(current_user: User = Depends(get_current_user)):
 
 @router.get("/google")
 def google_login():
+    """
+    Redirects the browser to Google's OAuth consent screen.
+
+    Returns 501 if GOOGLE_CLIENT_ID isn't set so the error is clear during
+    local dev rather than failing silently at the Google redirect.
+
+    Returns:
+        RedirectResponse: Sends the browser to Google's authorization URL.
+    """
     if not GOOGLE_CLIENT_ID:
         raise HTTPException(status_code=501, detail="Google OAuth not configured — set GOOGLE_CLIENT_ID env var")
     params = urlencode({
@@ -190,6 +313,23 @@ def google_login():
 
 @router.get("/google/callback")
 async def google_callback(code: str, db: Session = Depends(get_db)):
+    """
+    Handles the OAuth callback from Google after the user grants consent.
+
+    Trades the authorization code for an access token, fetches the user's
+    profile, then creates or updates the local user record. Merges accounts
+    by email — if a user already exists with that address they're linked to
+    Google rather than creating a duplicate account. On success redirects to
+    the frontend root with the JWT in the query string.
+
+    Args:
+        code (str): The one-time authorization code provided by Google.
+        db (Session): Database session.
+
+    Returns:
+        RedirectResponse: Frontend URL with JWT on success, or signin page with
+            an error param on failure.
+    """
     async with httpx.AsyncClient() as client:
         # trade the code Google gave us for an actual access token
         token_res = await client.post(
@@ -241,6 +381,15 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
 
 @router.get("/github")
 def github_login():
+    """
+    Redirects the browser to GitHub's OAuth authorization page.
+
+    Returns 501 if GITHUB_CLIENT_ID isn't set so the error is clear during
+    local dev rather than failing at the GitHub redirect.
+
+    Returns:
+        RedirectResponse: Sends the browser to GitHub's authorization URL.
+    """
     if not GITHUB_CLIENT_ID:
         raise HTTPException(status_code=501, detail="GitHub OAuth not configured — set GITHUB_CLIENT_ID env var")
     params = urlencode({
@@ -253,6 +402,22 @@ def github_login():
 
 @router.get("/github/callback")
 async def github_callback(code: str, db: Session = Depends(get_db)):
+    """
+    Handles the OAuth callback from GitHub after the user authorizes the app.
+
+    Trades the code for an access token, fetches the user's profile, then
+    creates or updates the local user record. GitHub sometimes hides the
+    primary email in the profile response — the emails endpoint fallback is
+    necessary for users with private email settings on GitHub.
+
+    Args:
+        code (str): The one-time authorization code provided by GitHub.
+        db (Session): Database session.
+
+    Returns:
+        RedirectResponse: Frontend URL with JWT on success, or signin page with
+            an error param on failure.
+    """
     async with httpx.AsyncClient() as client:
         # trade the code GitHub gave us for an access token
         token_res = await client.post(

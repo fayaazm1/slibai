@@ -6,7 +6,17 @@
 # Files fetched (best-effort — silently skipped if absent):
 #   requirements.txt, setup.py, pyproject.toml,
 #   package.json, Pipfile, environment.yml
-
+"""
+Houses the entire repo scanning feature — URL parsing, dependency file fetching,
+per-format parsers, and catalogue matching all live here rather than in a separate
+service module because the pieces are tightly coupled and the feature is self-contained.
+Any visitor can scan a public repo without an account; submitting a tool request from
+the results requires a signed-in user. The scan itself is synchronous — it blocks the
+request while fetching GitHub files, which is fine because each fetch is fast and the
+total number of files per scan is small. Module-level rate-limit state is shared across
+all requests in the same process so one bad request that hits the GitHub cap protects
+subsequent requests from also hammering the API unnecessarily.
+"""
 import os
 import re
 import time
@@ -116,7 +126,22 @@ _ALIASES: dict[str, str] = {
 # ── URL parsing ──────────────────────────────────────────────────────────────
 
 def _parse_repo(url: str) -> tuple[str, str]:
-    """Extract owner and repo name from a GitHub URL. Raises ValueError on bad input."""
+    """
+    Extract owner and repo name from a GitHub URL. Raises ValueError on bad input.
+
+    Handles both https://github.com/owner/repo and github.com/owner/repo forms,
+    and strips a trailing .git suffix if present.
+
+    Args:
+        url (str): A GitHub repository URL from the user's input.
+
+    Returns:
+        tuple[str, str]: (owner, repo_name) parsed from the URL.
+
+    Note:
+        Raises ValueError with a descriptive message — the caller in scan_repo
+        converts this to an HTTP 400.
+    """
     url = url.strip().rstrip("/")
     # accept: https://github.com/owner/repo  or  github.com/owner/repo
     m = re.search(r"github\.com/([^/]+)/([^/\s]+)", url)
@@ -136,6 +161,14 @@ def _fetch_file(owner: str, repo: str, path: str) -> str | None:
     Returns the decoded text content, or None if the file is missing or any
     error occurs — a missing file is normal and should never abort the scan.
     Retries once on 5xx errors. Tracks rate-limit reset time on 403.
+
+    Args:
+        owner (str): GitHub repository owner.
+        repo (str): Repository name.
+        path (str): File path within the repository, e.g. "requirements.txt".
+
+    Returns:
+        str | None: Decoded UTF-8 file content, or None on any failure.
     """
     global _rate_limit_reset
 
@@ -177,6 +210,18 @@ def _fetch_file(owner: str, repo: str, path: str) -> str | None:
 # ── Dependency parsers ───────────────────────────────────────────────────────
 
 def _parse_requirements_txt(text: str) -> list[str]:
+    """
+    Extracts package names from requirements.txt content.
+
+    Strips version specifiers, extras, and environment markers. Skips comment
+    lines, editable installs (-e), and URL-based deps (git+, http).
+
+    Args:
+        text (str): Raw requirements.txt file content.
+
+    Returns:
+        list[str]: Lowercased package names with version info stripped.
+    """
     libs = []
     for line in text.splitlines():
         line = line.strip()
@@ -190,6 +235,18 @@ def _parse_requirements_txt(text: str) -> list[str]:
 
 
 def _parse_package_json(text: str) -> list[str]:
+    """
+    Extracts package names from package.json content.
+
+    Combines both dependencies and devDependencies — AI projects often put
+    ML packages in devDependencies if they're only used in training scripts.
+
+    Args:
+        text (str): Raw package.json file content.
+
+    Returns:
+        list[str]: Lowercased package names. Empty list if JSON is malformed.
+    """
     import json
     try:
         data = json.loads(text)
@@ -202,6 +259,19 @@ def _parse_package_json(text: str) -> list[str]:
 
 
 def _parse_pyproject_toml(text: str) -> list[str]:
+    """
+    Extracts dependency names from pyproject.toml content.
+
+    Does a line-by-line parse rather than a full TOML parse to avoid adding a
+    toml dependency. Reads any section whose header contains "dependencies"
+    and stops when the next section header appears.
+
+    Args:
+        text (str): Raw pyproject.toml file content.
+
+    Returns:
+        list[str]: Lowercased package names with version specifiers stripped.
+    """
     libs = []
     in_deps = False
     for line in text.splitlines():
@@ -219,6 +289,18 @@ def _parse_pyproject_toml(text: str) -> list[str]:
 
 
 def _parse_pipfile(text: str) -> list[str]:
+    """
+    Extracts package names from a Pipfile.
+
+    Reads both [packages] and [dev-packages] sections, stopping when any
+    other section header appears.
+
+    Args:
+        text (str): Raw Pipfile content.
+
+    Returns:
+        list[str]: Lowercased package names.
+    """
     libs = []
     in_packages = False
     for line in text.splitlines():
@@ -236,6 +318,18 @@ def _parse_pipfile(text: str) -> list[str]:
 
 
 def _parse_environment_yml(text: str) -> list[str]:
+    """
+    Extracts package names from a conda environment.yml file.
+
+    Reads the dependencies: block and skips pip sub-block headers and conda
+    channel specs (those with :: in the name). Version pins are stripped.
+
+    Args:
+        text (str): Raw environment.yml content.
+
+    Returns:
+        list[str]: Lowercased package names.
+    """
     libs = []
     in_deps = False
     for line in text.splitlines():
@@ -259,8 +353,20 @@ def _parse_environment_yml(text: str) -> list[str]:
 
 def _fetch_all_deps(owner: str, repo: str) -> tuple[list[str], list[str]]:
     """
-    Fetch all supported dependency files and return (raw_libs, files_found).
+    Fetches all supported dependency files and returns (raw_libs, files_found).
     Each file is attempted independently — a missing file is silently skipped.
+
+    Checks requirements.txt in three locations (root, requirements/base.txt,
+    requirements/prod.txt) to handle common multi-file project layouts.
+
+    Args:
+        owner (str): GitHub repository owner.
+        repo (str): Repository name.
+
+    Returns:
+        tuple[list[str], list[str]]: First element is deduplicated list of
+            package names found across all files. Second element is the list
+            of file paths that were actually found and parsed.
     """
     fetchers: list[tuple[str, callable]] = [
         ("requirements.txt",  _parse_requirements_txt),
@@ -296,7 +402,16 @@ def _fetch_all_deps(owner: str, repo: str) -> tuple[list[str], list[str]]:
 # ── Catalogue matching ───────────────────────────────────────────────────────
 
 def _normalize(s: str) -> str:
-    """Lowercase and remove separators for comparison. No suffix stripping to avoid false positives."""
+    """
+    Lowercases and removes separators for comparison. No suffix stripping to
+    avoid false positives.
+
+    Args:
+        s (str): Raw library or tool name to normalize.
+
+    Returns:
+        str: Normalized string with hyphens, underscores, dots, and spaces removed.
+    """
     s = s.lower().strip()
     s = re.sub(r"[-_\.\s]+", "", s)  # drop separators only
     return s
@@ -321,6 +436,14 @@ def _match_library(lib: str, tools: list[dict]) -> dict | None:
     positives (e.g. a library containing "light" substring matching a tool whose
     tag happened to include that word).  The _ALIASES table is the correct and
     explicit mechanism for import-name aliasing.
+
+    Args:
+        lib (str): The dependency name from the parsed requirements file.
+        tools (list[dict]): Active catalogue tools, each with at least "id" and "name".
+
+    Returns:
+        dict | None: Match result with library, tool_id, tool_name, and confidence
+            keys, or None if no match was found.
     """
     norm_lib  = _normalize(lib)
     alias_lib = _normalize(_ALIASES.get(lib, _ALIASES.get(lib.lower(), lib)))
@@ -378,6 +501,24 @@ def scan_repo(body: ScanRequest, db: Session = Depends(get_db)):
     """
     Scan a GitHub repository's dependency files and match found libraries
     against the SLIBai AI tool catalogue.
+
+    No authentication required — any visitor can scan a public repo. The scan
+    blocks the request thread while fetching from GitHub, which is acceptable
+    given that each individual file fetch is fast and capped by a 10s timeout.
+    Scan results are logged to ScanLog for analytics, but a logging failure
+    never breaks the actual response.
+
+    Args:
+        body (ScanRequest): Contains the GitHub repository URL to scan.
+        db (Session): Database session for catalogue lookups and scan logging.
+
+    Returns:
+        ScanResponse: Files found, matched AI tools with confidence scores,
+            unmatched libraries, and scan duration in milliseconds.
+
+    Note:
+        Returns 429 immediately if the module-level rate limit state indicates
+        GitHub has blocked us, saving the request from making doomed API calls.
     """
     # Fail fast with a clear message if GitHub has rate-limited us
     if _rate_limit_reset and time.time() < _rate_limit_reset:
@@ -461,7 +602,22 @@ def submit_tool_request(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Submit a request to add a library to the SLIBai catalogue."""
+    """
+    Submit a request to add a library to the SLIBai catalogue.
+
+    Requires a signed-in account — anonymous scanning is fine but submitting
+    requests needs an identity so admins can follow up if needed. The dedup
+    check prevents the same user from submitting duplicate pending requests
+    for the same library name, which would clutter the admin review queue.
+
+    Args:
+        body (ToolRequestBody): The library name and optional repo URL as context.
+        current_user (User): The authenticated user making the request.
+        db (Session): Database session.
+
+    Returns:
+        dict: Confirmation message and the new request's ID.
+    """
     name = body.submitted_name.strip()
     if not name:
         raise HTTPException(status_code=400, detail="submitted_name is required.")

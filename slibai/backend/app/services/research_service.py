@@ -20,6 +20,16 @@
 #     - requirements.txt presence implies the library is actively used
 #     - Star count >= 50 is a reasonable proxy for "real-world adoption"
 
+"""
+Handles the AI library usage research scan — sampling GitHub repos, parsing their
+requirements.txt files, and counting library appearances against LIBRARY_TAXONOMY.
+Lives in services/ rather than routes/ because the scanning logic is substantial
+enough to deserve its own module. The route in routes/research.py calls
+run_research_scan() in a background thread and polls get_progress() on subsequent
+requests. Progress state is held in a module-level dict (_progress) protected by a
+threading.Lock rather than a database or Redis — this resets on every process restart,
+which is fine for demo purposes but something to revisit for a production deployment.
+"""
 import json
 import os
 import re
@@ -148,6 +158,8 @@ SEARCH_QUERIES = [
 # Simple in-process progress dict — no Redis/Celery needed for demo purposes.
 # Thread-safe via _progress_lock; readers get a snapshot via get_progress().
 
+# without this lock, the background scan thread writing to _progress and the
+# /research/progress route reading it could collide and produce a torn read mid-update
 _progress_lock = threading.Lock()
 _progress: dict = {
     "running":           False,
@@ -164,13 +176,31 @@ _progress: dict = {
 
 
 def get_progress() -> dict:
-    """Return a thread-safe snapshot of the current scan progress."""
+    """
+    Returns a thread-safe snapshot of the current scan progress.
+
+    The dict() copy inside the lock is important — returning a reference to
+    _progress directly would let callers read fields while the background thread
+    is mid-update, potentially seeing a mix of old and new values.
+
+    Returns:
+        dict: Shallow copy of _progress, safe to inspect without holding the lock.
+    """
     with _progress_lock:
         return dict(_progress)
 
 
 def _set(**kwargs) -> None:
-    """Update one or more progress fields atomically."""
+    """
+    Updates one or more progress fields atomically under _progress_lock.
+
+    All writes to _progress go through here so we never accidentally mutate the
+    dict without holding the lock. The route and the background thread both call
+    this, so the lock is always needed.
+
+    Args:
+        **kwargs: Field names and values to update in _progress.
+    """
     with _progress_lock:
         _progress.update(kwargs)
 
@@ -178,7 +208,28 @@ def _set(**kwargs) -> None:
 # ── GitHub helpers ────────────────────────────────────────────────────────────
 
 def _search_repos(query: str, per_page: int = 25) -> list[dict]:
-    """Search GitHub for repos matching a query. Returns list of {owner, repo, stars}."""
+    """
+    Search GitHub for repos matching a query. Returns list of {owner, repo, stars}.
+
+    Hits the GitHub search/repositories endpoint sorted by stars descending. On any
+    failure (network timeout, rate limit, bad response) it logs a warning and returns
+    an empty list — losing one query's worth of repos is better than aborting the
+    whole scan.
+
+    Args:
+        query (str): A GitHub search query string, e.g.
+            "topic:machine-learning language:python stars:>50".
+        per_page (int): Results to request. GitHub's API caps this at 100 regardless
+            of what's passed.
+
+    Returns:
+        list[dict]: Each dict has "owner", "repo", and "stars". Empty list on error.
+
+    Note:
+        GitHub's search API returns at most 1,000 results per query regardless of
+        how many total matches exist — this function is explicitly for sampling,
+        not exhaustive enumeration.
+    """
     try:
         r = requests.get(
             f"{GITHUB_API}/search/repositories",
@@ -198,7 +249,22 @@ def _search_repos(query: str, per_page: int = 25) -> list[dict]:
 
 
 def _fetch_requirements(owner: str, repo: str) -> str | None:
-    """Fetch raw requirements.txt content. Returns None if absent or on error."""
+    """
+    Fetches the raw content of requirements.txt from a GitHub repo's root.
+
+    Uses the contents API, which returns base64-encoded file content. Only checks
+    the repo root — subdirectory requirement files like requirements/prod.txt are
+    not checked. That's a deliberate tradeoff: we miss some repos, but avoid an
+    extra directory-listing API call per repo.
+
+    Args:
+        owner (str): GitHub username or organization name.
+        repo (str): Repository name.
+
+    Returns:
+        str | None: Decoded file text, or None if the file doesn't exist or the
+            request fails for any reason.
+    """
     try:
         import base64
         r = requests.get(
@@ -214,7 +280,21 @@ def _fetch_requirements(owner: str, repo: str) -> str | None:
 
 
 def _parse_requirements(text: str) -> list[str]:
-    """Extract normalized library names from requirements.txt content."""
+    """
+    Extracts normalized package names from requirements.txt content.
+
+    Strips version specifiers, extras, and environment markers. Lines starting
+    with -, git+, or http are skipped — those are editable installs and URL-based
+    deps that won't match canonical PyPI names.
+
+    Args:
+        text (str): Raw requirements.txt content as a string.
+
+    Returns:
+        list[str]: Lowercased package names with version info stripped, e.g.
+            ["torch", "transformers", "numpy"]. Names not in LIBRARY_TAXONOMY
+            are filtered out in the calling loop.
+    """
     libs = []
     for line in text.splitlines():
         line = line.strip()
@@ -227,6 +307,21 @@ def _parse_requirements(text: str) -> list[str]:
 
 
 def _respect_rate_limit(headers: dict) -> None:
+    """
+    Backs off when the GitHub API rate limit is nearly exhausted.
+
+    Checks X-RateLimit-Remaining after a response — under 5 remaining requests,
+    sleeps until the reset window expires (capped at 120s to avoid hanging on a
+    bad header value). Above 5, does the standard 0.4s courtesy pause.
+
+    Args:
+        headers (dict): Response headers from a GitHub API call.
+
+    Note:
+        Not currently wired into run_research_scan — pacing there is handled with
+        explicit time.sleep(0.4) calls. This helper exists for future use in
+        higher-frequency scanning loops.
+    """
     remaining = int(headers.get("X-RateLimit-Remaining", 10))
     if remaining < 5:
         reset_at = int(headers.get("X-RateLimit-Reset", time.time() + 60))
@@ -251,6 +346,25 @@ def run_research_scan(repos_per_query: int = 25) -> dict:
       - Results are saved to research_results.json
 
     Progress is tracked in _progress and readable via get_progress() at any time.
+
+    This is designed to run in a background thread — routes/research.py spawns it
+    with threading.Thread and then the frontend polls /research/progress. If the scan
+    raises, the exception is re-raised after updating _progress so the thread dies
+    cleanly and the error surfaces through get_progress().
+
+    Args:
+        repos_per_query (int): How many repos to sample per search query. Capped at
+            100 by the GitHub API. Higher values give better coverage at the cost of
+            more API calls and longer runtime.
+
+    Returns:
+        dict: The full output written to research_results.json, including scan_date,
+            repos_scanned, methodology, limitations, assumptions, and results list.
+
+    Note:
+        Results are written to a plain JSON file, not the database. That was a
+        deliberate call — research results are append-style snapshots, not live
+        records that need querying or updating.
     """
     _set(
         running=True,
@@ -317,7 +431,7 @@ def run_research_scan(repos_per_query: int = 25) -> dict:
 
             _set(queries_completed=qi + 1)
             if qi < len(SEARCH_QUERIES) - 1:
-                time.sleep(1.5)  # pause between search queries
+                time.sleep(1.5)  # pause between search queries so consecutive searches don't land in the same rate-limit window
 
         _set(current_stage="Saving results")
         print(f"[Research] Scanned {repos_with_reqs} repos with requirements.txt, found {len(lib_counts)} taxonomy libraries")
@@ -407,7 +521,21 @@ def run_research_scan(repos_per_query: int = 25) -> dict:
 
 
 def load_results() -> dict | None:
-    """Load the last saved research results. Returns None if no scan has been run."""
+    """
+    Load the last saved research results. Returns None if no scan has been run.
+
+    A missing file is a normal first-startup state, not an error — the frontend
+    handles None by showing a "no results yet, run a scan" prompt.
+
+    Returns:
+        dict | None: The full output dict from the last scan, including scan_date,
+            repos_scanned, methodology, limitations, assumptions, and results list.
+            None if research_results.json doesn't exist yet.
+
+    Note:
+        JSON parse errors are caught and return None silently. This protects the
+        endpoint from crashing if the results file somehow got corrupted.
+    """
     if not DATA_FILE.exists():
         return None
     try:

@@ -7,7 +7,17 @@
 #     dead or irrelevant and remove it.
 #   - We always write to a temp file first, then rename it — that way a crash
 #     mid-write can't corrupt the database.
-
+"""
+Responsible for merging a freshly crawled batch of tools into the existing catalogue
+without losing manually curated entries or corrupting the file on a bad write. It sits
+between the crawlers (github_crawler.py, etc.) and the data files — crawlers produce
+raw tool dicts, this file decides what to keep, update, or remove. There are two paths:
+merge() writes to ai_tools.json, merge_to_db() does the same thing against PostgreSQL,
+and both follow identical rules so the catalogue stays consistent regardless of which
+backend is active. The trickiest part is deduplication — source_id is the most reliable
+key, but tools sourced from different crawlers sometimes arrive with only a name or URL
+to match on, so we fall through all three lookup tables before treating something as new.
+"""
 import json
 import os
 from datetime import datetime, timezone
@@ -20,11 +30,27 @@ if TYPE_CHECKING:
 DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "ai_tools.json"
 META_FILE = Path(__file__).resolve().parent.parent / "data" / "crawl_meta.json"
 
-# How many crawls a tool can be missing before we drop it
+# How many crawls a tool can be missing before we drop it.
+# One missed cycle can happen for innocent reasons — GitHub rate limiting,
+# a temporary network timeout, or the API just being flaky. Evicting after
+# just 1 miss would delete legitimate tools too aggressively. 3 gives enough
+# buffer to ride out transient failures without letting truly dead tools linger.
 MAX_STALE_CRAWLS = 3
 
 
 def _load(path: Path):
+    """
+    Reads a JSON file from disk if it exists, otherwise returns an empty list.
+
+    The empty-list default is intentional — on first run there is no ai_tools.json
+    yet, and the merge logic handles an empty existing list just fine.
+
+    Args:
+        path (Path): Absolute path to the JSON file to read.
+
+    Returns:
+        list | dict: Parsed JSON content, or [] if the file doesn't exist yet.
+    """
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -32,20 +58,59 @@ def _load(path: Path):
 
 
 def _atomic_write(path: Path, data) -> None:
+    """
+    Writes data to a temp file then swaps it into place with os.replace.
+
+    A direct write to ai_tools.json would leave the file half-written and
+    unreadable if the process crashed mid-write — anyone reading it at that
+    moment would get corrupt JSON. Writing to .tmp first means os.replace is
+    the only operation that makes the change visible, and on Linux that rename
+    is atomic: either the full swap happens or nothing changes, and no reader
+    ever sees a partial state.
+
+    Args:
+        path (Path): Target file path. The .tmp sibling must be on the same
+            filesystem as path, which is always the case here since they share
+            the same /data/ directory.
+        data: Any JSON-serializable value to write.
+    """
     # Write to a .tmp file first, then rename to the real file.
     # This prevents a half-written file if something crashes mid-save.
     tmp = path.with_suffix(".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
+    # os.replace is atomic on Linux — the swap either fully completes or doesn't
+    # happen at all, so ai_tools.json is never in an intermediate broken state
     os.replace(tmp, path)
 
 
 def _norm(name: str) -> str:
+    """
+    Normalizes a tool name for deduplication comparisons.
+
+    Args:
+        name (str): Raw tool name as it came from the crawler or JSON file.
+
+    Returns:
+        str: Lowercased, stripped name used as a dedup lookup key.
+    """
     # Lowercase + strip so "TensorFlow" and "tensorflow" are treated as the same tool
     return name.lower().strip()
 
 
 def _norm_url(url: str) -> str:
+    """
+    Normalizes a URL for deduplication comparisons.
+
+    Strips trailing slashes and lowercases so "https://Example.com/" and
+    "https://example.com" don't create duplicate entries for the same tool.
+
+    Args:
+        url (str): Raw URL string from the crawler or existing record.
+
+    Returns:
+        str: Normalized URL used as a dedup lookup key.
+    """
     return url.rstrip("/").lower()
 
 
@@ -53,6 +118,24 @@ def merge(new_tools: list) -> dict:
     """
     Takes the list of tools just crawled and merges them into ai_tools.json.
     Returns a small summary of what changed: how many were added, updated, or removed.
+
+    Dedup priority is source+source_id first (most stable across renames), then
+    official_url, then name. Manual tools are never overwritten — only their live
+    stats (stars, url_status, last_crawled) get refreshed. Auto-sourced tools that
+    weren't seen for 3 consecutive crawls are evicted. Both ai_tools.json and
+    crawl_meta.json are updated atomically via temp file swaps.
+
+    Args:
+        new_tools (list): Tool dicts as returned by the crawler. Each dict should
+            have at least name, source, source_id, and official_url for reliable
+            deduplication — tools missing all three fall through to a new insert.
+
+    Returns:
+        dict: Stats with keys "added", "updated", "removed", "total".
+
+    Note:
+        Every call hits disk twice — once to read and once to write. Fine for a
+        nightly crawl job but not something to call in a hot path.
     """
     existing: list = _load(DATA_FILE)
     now = datetime.now(timezone.utc).isoformat()
@@ -191,6 +274,20 @@ def merge_to_db(new_tools: list, db: "Session") -> dict:
       - Tools not seen this crawl: increment stale_count. Remove at >= 3.
 
     Called only when USE_DB_FOR_CRAWLER_WRITES=true. JSON path is unchanged.
+
+    Args:
+        new_tools (list): Tool dicts as returned by the crawler, same shape as
+            what merge() receives.
+        db (Session): Active SQLAlchemy session — caller is responsible for
+            passing a valid session; this function calls db.commit() internally.
+
+    Returns:
+        dict: Stats with keys "added", "updated", "removed", "total".
+
+    Note:
+        All existing rows are loaded into memory at the start for matching, then
+        individual ORM objects are mutated in place. SQLAlchemy tracks the dirty
+        rows and flushes everything in one db.commit() at the end.
     """
     from app.models.tool import Tool
     from sqlalchemy import func
